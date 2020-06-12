@@ -1,0 +1,7 @@
+alarm
+alarm_test
+build
+lcov
+
+.vscode/
+/callgrind.out.*
