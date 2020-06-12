@@ -18,7 +18,8 @@ size_t readFile(const char *filename, Buffer_t &buffer)
     const FILEUnique file{std::fopen(filename, "r")};
     if (file)
     {
-        if (size_t size = std::fread(buffer, sizeof(*buffer), sizeof(buffer) / sizeof(*buffer), file.get()))
+        // omit the last byte when reading, so we can safely use buffer[size]
+        if (size_t size = std::fread(buffer, sizeof(*buffer), sizeof(buffer) / sizeof(*buffer) - 1, file.get()))
         {
             buffer[size] = '\0';
             if (const char *end = std::strchr(buffer, '\n'))

@@ -85,6 +85,10 @@ size_t WindowFactory::getDriverSize() const
 
 std::string_view WindowFactory::getDriver(size_t index) const
 {
+    if (index >= getDriverSize())
+    {
+        throw std::runtime_error{"Invalid driver index: " + std::to_string(index)};
+    }
     return kDrivers[index].first;
 }
 

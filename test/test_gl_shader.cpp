@@ -34,7 +34,7 @@ constexpr char kInvalidShader[] = "#pragma once";
 
 } // namespace
 
-class GlShaderTest : public ::testing::Test
+class TestGlShader : public ::testing::Test
 {
 public:
     WindowFactory factory;
@@ -50,19 +50,19 @@ public:
     }
 };
 
-TEST_F(GlShaderTest, BasicVertex)
+TEST_F(TestGlShader, BasicVertex)
 {
     GlVertexShader shader{kValidVertex};
     (void)shader;
 }
 
-TEST_F(GlShaderTest, BasicFragment)
+TEST_F(TestGlShader, BasicFragment)
 {
     GlFragmentShader shader{kValidFragment};
     (void)shader;
 }
 
-TEST_F(GlShaderTest, BasicProgram)
+TEST_F(TestGlShader, BasicProgram)
 {
     const std::string vertex = kValidVertex;
     const std::string fragment = kValidFragment;
@@ -77,7 +77,7 @@ TEST_F(GlShaderTest, BasicProgram)
     EXPECT_FALSE(str.str().empty());
 }
 
-TEST_F(GlShaderTest, InvalidVertex)
+TEST_F(TestGlShader, InvalidVertex)
 {
     try
     {
@@ -89,7 +89,7 @@ TEST_F(GlShaderTest, InvalidVertex)
     }
 }
 
-TEST_F(GlShaderTest, InvalidFragment)
+TEST_F(TestGlShader, InvalidFragment)
 {
     try
     {
@@ -101,7 +101,7 @@ TEST_F(GlShaderTest, InvalidFragment)
     }
 }
 
-TEST_F(GlShaderTest, NoLinkProgram)
+TEST_F(TestGlShader, NoLinkProgram)
 {
     static constexpr char fragment[] = R"(\
 #version 100

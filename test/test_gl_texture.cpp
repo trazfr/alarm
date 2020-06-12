@@ -11,6 +11,8 @@
 namespace
 {
 
+constexpr char kFilename[] = "test.dds";
+
 constexpr char vertexShader[] = R"(\
 #version 100
 
@@ -52,7 +54,7 @@ constexpr GLushort indices[] = {0, 1, 2, 0, 2, 3};
 
 } // namespace
 
-class GlTextureTest : public ::testing::Test
+class TestGlTexture : public ::testing::Test
 {
 protected:
     WindowFactory factory;
@@ -99,6 +101,8 @@ protected:
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
         factory.get().end();
+
+        unlink(kFilename);
     }
 
     std::unique_ptr<GlProgram> program;
@@ -108,35 +112,35 @@ protected:
     GLint samplerLoc;
 };
 
-TEST_F(GlTextureTest, RGB)
+TEST_F(TestGlTexture, RGB)
 {
     system("convert -size 128x128 -define gradient:angle=45 gradient:red-blue -format dds -define dds:compression=none -define dds:mipmaps=7 test.dds");
-    texture = std::make_unique<GlTexture>("test.dds");
+    texture = std::make_unique<GlTexture>(kFilename);
 }
 
-TEST_F(GlTextureTest, BGRA)
+TEST_F(TestGlTexture, BGRA)
 {
     system("convert -size 128x128 -background none gradient:none-red -flatten -format dds -define dds:compression=none -define dds:mipmaps=7 test.dds");
-    texture = std::make_unique<GlTexture>("test.dds");
+    texture = std::make_unique<GlTexture>(kFilename);
 }
 
 // not supported by Raspberry Pi
-TEST_F(GlTextureTest, DISABLED_DXT1)
+TEST_F(TestGlTexture, DISABLED_DXT1)
 {
     system("convert -size 128x128 -define gradient:angle=45 gradient:red-blue -format dds -define dds:compression=dxt1 -define dds:mipmaps=7 test.dds");
-    texture = std::make_unique<GlTexture>("test.dds");
+    texture = std::make_unique<GlTexture>(kFilename);
 }
 
 // not supported by Raspberry Pi
-TEST_F(GlTextureTest, DISABLED_DXT3)
+TEST_F(TestGlTexture, DISABLED_DXT3)
 {
     system("convert -size 128x128 -background none gradient:none-red -flatten -format dds -define dds:compression=dxt3 -define dds:mipmaps=7 test.dds");
-    texture = std::make_unique<GlTexture>("test.dds");
+    texture = std::make_unique<GlTexture>(kFilename);
 }
 
 // not supported by Raspberry Pi
-TEST_F(GlTextureTest, DISABLED_DXT5)
+TEST_F(TestGlTexture, DISABLED_DXT5)
 {
     system("convert -size 128x128 -background none gradient:none-red -flatten -format dds -define dds:compression=dxt5 -define dds:mipmaps=7 test.dds");
-    texture = std::make_unique<GlTexture>("test.dds");
+    texture = std::make_unique<GlTexture>(kFilename);
 }

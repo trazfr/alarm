@@ -7,6 +7,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -150,7 +151,7 @@ public:
     std::vector<DummyChild> arrayObjects;
 };
 
-class SerializerRapidJSONTest : public ::testing::Test
+class TestSerializerRapidJSON : public ::testing::Test
 {
 protected:
     void test(const char *result)
@@ -178,7 +179,7 @@ protected:
     DummySerializable ser;
 };
 
-TEST_F(SerializerRapidJSONTest, booleans)
+TEST_F(TestSerializerRapidJSON, booleans)
 {
     ser.booleans = {
         {"true", true},
@@ -189,7 +190,7 @@ TEST_F(SerializerRapidJSONTest, booleans)
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, integers)
+TEST_F(TestSerializerRapidJSON, integers)
 {
     ser.integers = {
         {"one", 1},
@@ -200,7 +201,7 @@ TEST_F(SerializerRapidJSONTest, integers)
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, floats)
+TEST_F(TestSerializerRapidJSON, floats)
 {
     ser.floats = {
         {"one", .1},
@@ -211,7 +212,7 @@ TEST_F(SerializerRapidJSONTest, floats)
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, strings)
+TEST_F(TestSerializerRapidJSON, strings)
 {
     ser.strings = {
         {"one", "1"},
@@ -222,28 +223,28 @@ TEST_F(SerializerRapidJSONTest, strings)
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, object)
+TEST_F(TestSerializerRapidJSON, object)
 {
     ser.child.value = 1;
     static constexpr char result[] = R"({"CHILD":{"value":1}})";
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, arrayFloats)
+TEST_F(TestSerializerRapidJSON, arrayFloats)
 {
     ser.arrayFloats = {.1, .2, .3};
     static constexpr char result[] = R"({"ARRAY_FLOATS":[0.1,0.2,0.3]})";
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, arrayIntegers)
+TEST_F(TestSerializerRapidJSON, arrayIntegers)
 {
     ser.arrayIntegers = {1, 2, 3};
     static constexpr char result[] = R"({"ARRAY_INTS":[1,2,3]})";
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, arrayObjects)
+TEST_F(TestSerializerRapidJSON, arrayObjects)
 {
     ser.arrayObjects = std::vector<DummyChild>(3);
     ser.arrayObjects[0].value = 1;
@@ -253,7 +254,74 @@ TEST_F(SerializerRapidJSONTest, arrayObjects)
     test(result);
 }
 
-TEST_F(SerializerRapidJSONTest, file)
+TEST_F(TestSerializerRapidJSON, Serializer_AddSeveralTimes)
+{
+    ser.integers = {{"ARRAY_INTS", 1}};
+    ser.booleans = {{"ARRAY_INTS", true}};
+    ser.arrayIntegers = {1, 2, 3};
+
+    rapidjson::Document doc{rapidjson::Type::kObjectType};
+    SerializerRapidJSON serial{doc, doc.GetAllocator()};
+    // see DummySerializable::save() the last one is the array
+    ser.save(serial);
+
+    // best effort, only the last is kept
+    EXPECT_TRUE(doc["ARRAY_INTS"].IsArray());
+}
+
+TEST_F(TestSerializerRapidJSON, Deserializer_missingKeys)
+{
+    // empty document: all keys are missing
+    const rapidjson::Document doc{rapidjson::Type::kObjectType};
+    const DeserializerRapidJSON deserializer{doc};
+
+    EXPECT_FALSE(deserializer.getBool("MISSING"));
+    EXPECT_FALSE(deserializer.getFloat("MISSING"));
+    EXPECT_FALSE(deserializer.getInt("MISSING"));
+    EXPECT_FALSE(deserializer.getString("MISSING"));
+    EXPECT_FALSE(deserializer.getObject("MISSING", ser));
+
+    EXPECT_EQ(0, deserializer.getArraySize("MISSING"));
+    EXPECT_FALSE(deserializer.getFloatFromArrayAt("MISSING", 0));
+    EXPECT_FALSE(deserializer.getIntFromArrayAt("MISSING", 0));
+    EXPECT_FALSE(deserializer.getObjectFromArrayAt("MISSING", 0, ser));
+}
+
+TEST_F(TestSerializerRapidJSON, Deserializer_wrongType)
+{
+    // empty document: all keys are missing
+    rapidjson::Document doc{rapidjson::Type::kObjectType};
+    doc.AddMember(rapidjson::StringRef("bool"), rapidjson::Value{true}, doc.GetAllocator());
+    doc.AddMember(rapidjson::StringRef("int"), rapidjson::Value{42}, doc.GetAllocator());
+
+    const DeserializerRapidJSON deserializer{doc};
+
+    EXPECT_FALSE(deserializer.getBool("int"));
+    EXPECT_FALSE(deserializer.getFloat("bool"));
+    EXPECT_FALSE(deserializer.getInt("bool"));
+    EXPECT_FALSE(deserializer.getString("bool"));
+    EXPECT_FALSE(deserializer.getObject("bool", ser));
+
+    EXPECT_EQ(0, deserializer.getArraySize("int"));
+    EXPECT_FALSE(deserializer.getFloatFromArrayAt("int", 0));
+    EXPECT_FALSE(deserializer.getIntFromArrayAt("int", 0));
+    EXPECT_FALSE(deserializer.getObjectFromArrayAt("int", 0, ser));
+}
+
+TEST_F(TestSerializerRapidJSON, Deserializer_missingArrayIndex)
+{
+    // empty document: all keys are missing
+    rapidjson::Document doc{rapidjson::Type::kObjectType};
+    doc.AddMember(rapidjson::StringRef("array"), rapidjson::Type::kArrayType, doc.GetAllocator());
+
+    const DeserializerRapidJSON deserializer{doc};
+
+    EXPECT_FALSE(deserializer.getFloatFromArrayAt("array", 100));
+    EXPECT_FALSE(deserializer.getIntFromArrayAt("array", 100));
+    EXPECT_FALSE(deserializer.getObjectFromArrayAt("array", 100, ser));
+}
+
+TEST_F(TestSerializerRapidJSON, fileSerialization_Basic)
 {
     ser.integers = {
         {"one", 1},
@@ -273,6 +341,27 @@ TEST_F(SerializerRapidJSONTest, file)
 
     EXPECT_TRUE(result);
     EXPECT_EQ(ser.integers, ser2.integers);
+
+    unlink("dummy.json");
+}
+
+TEST_F(TestSerializerRapidJSON, fileSerialization_MissingFile)
+{
+    unlink("dummy.json");
+    FileSerializationHandlerRapidJSON fileSerial{"dummy.json"};
+    const bool result = fileSerial.load(ser);
+
+    EXPECT_FALSE(result);
+}
+
+TEST_F(TestSerializerRapidJSON, fileSerialization_NotAJson)
+{
+    std::ofstream{"dummy.json"} << "Hello, I am not a JSON file!";
+
+    FileSerializationHandlerRapidJSON fileSerial{"dummy.json"};
+    const bool result = fileSerial.load(ser);
+
+    EXPECT_FALSE(result);
 
     unlink("dummy.json");
 }

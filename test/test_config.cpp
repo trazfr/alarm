@@ -9,7 +9,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
-class ConfigTest : public ::testing::Test
+class TestConfig : public ::testing::Test
 {
 protected:
     Config config;
@@ -44,7 +44,7 @@ protected:
     }
 };
 
-TEST_F(ConfigTest, empty)
+TEST_F(TestConfig, empty)
 {
     test(R"({
     "alsa_device": "default",
@@ -62,7 +62,7 @@ TEST_F(ConfigTest, empty)
 })");
 }
 
-TEST_F(ConfigTest, full)
+TEST_F(TestConfig, full)
 {
     config.setSensorThermal("/dev/null");
     config.getAlarms().emplace_back();
@@ -98,7 +98,7 @@ TEST_F(ConfigTest, full)
 })");
 }
 
-TEST_F(ConfigTest, helpers)
+TEST_F(TestConfig, helpers)
 {
     EXPECT_EQ("folder/music/bla.mp3", config.getMusic("bla.mp3"));
     EXPECT_EQ("folder/shader/shader.vert", config.getShader("shader.vert"));

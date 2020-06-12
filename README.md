@@ -53,6 +53,7 @@ The dependencies:
 - [libmodplug](http://modplug-xmms.sourceforge.net/): decode MOD. License: [Public domain](https://sourceforge.net/p/modplug-xmms/git/ci/master/tree/libmodplug/COPYING)
 - [mpg123](https://mpg123.org/): decode MP3. License: [LGPL](http://mpg123.org/)
 - [vorbis](https://xiph.org/vorbis/): decode OGG Vorbis. License: [BSD](https://github.com/xiph/vorbis/blob/master/COPYING)
+- EGL / OpenGL ES 2
 
 For the tests:
 
@@ -302,6 +303,7 @@ Code:
 - Internationalization. For now this is in French :)
 - Unittest `audio_read_mod.hpp` / `audio_read_mod.cpp`: play with a tracker to add a 1 second file with a single sound
 - Unittest more classes, but I don't want to use GMock as it would need `virtual` in a lot of methods :/
+- Create a Debian package to ease the deployment once the code is stable enough
 
 Due to an some package delivery:
 

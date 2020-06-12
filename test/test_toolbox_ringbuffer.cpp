@@ -2,11 +2,11 @@
 
 #include "toolbox_ringbuffer.hpp"
 
-class RingBufferTest : public ::testing::Test
+class TestToolboxRingBuffer : public ::testing::Test
 {
 };
 
-TEST_F(RingBufferTest, Basic)
+TEST_F(TestToolboxRingBuffer, Basic)
 {
     RingBuffer<int, 4> buffer;
     EXPECT_EQ(4, buffer.capacity());
@@ -93,7 +93,7 @@ TEST_F(RingBufferTest, Basic)
     EXPECT_FALSE(pop);
 }
 
-TEST_F(RingBufferTest, NoCopy)
+TEST_F(TestToolboxRingBuffer, NoCopy)
 {
     RingBuffer<std::unique_ptr<int>, 4> buffer;
     EXPECT_TRUE(buffer.empty());

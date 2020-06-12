@@ -4,21 +4,28 @@
 
 class TestSensorFactory : public ::testing::Test
 {
+protected:
+    SensorFactory factory;
 };
+
+TEST_F(TestSensorFactory, debug)
+{
+    std::ostringstream str;
+    str << factory;
+    EXPECT_FALSE(str.str().empty());
+}
 
 TEST_F(TestSensorFactory, basic)
 {
     // this test is hardware dependent
-    SensorFactory factory;
     for (size_t i = 0; i < factory.getThermalSize(); ++i)
     {
         const Sensor *sensor = factory.getThermal(i);
-        ASSERT_TRUE(sensor);
+        EXPECT_TRUE(sensor);
     }
+}
 
+TEST_F(TestSensorFactory, overflow)
+{
     EXPECT_FALSE(factory.getThermal(std::numeric_limits<size_t>::max()));
-
-    std::ostringstream str;
-    str << factory;
-    EXPECT_FALSE(str.str().empty());
 }

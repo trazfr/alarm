@@ -8,7 +8,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
-class ConfigAlarmTest : public ::testing::Test
+class TestConfigAlarm : public ::testing::Test
 {
 protected:
     ConfigAlarm configAlarm;
@@ -38,7 +38,7 @@ protected:
     }
 };
 
-TEST_F(ConfigAlarmTest, empty)
+TEST_F(TestConfigAlarm, empty)
 {
     test(R"({
     "active": false,
@@ -48,7 +48,7 @@ TEST_F(ConfigAlarmTest, empty)
 })");
 }
 
-TEST_F(ConfigAlarmTest, inactive)
+TEST_F(TestConfigAlarm, inactive)
 {
     configAlarm.setActive(false);
     test(R"({
@@ -59,7 +59,7 @@ TEST_F(ConfigAlarmTest, inactive)
 })");
 }
 
-TEST_F(ConfigAlarmTest, active)
+TEST_F(TestConfigAlarm, active)
 {
     configAlarm.setActive(true);
     test(R"({
@@ -70,7 +70,7 @@ TEST_F(ConfigAlarmTest, active)
 })");
 }
 
-TEST_F(ConfigAlarmTest, minutes)
+TEST_F(TestConfigAlarm, minutes)
 {
     configAlarm.setMinutes(10);
     test(R"({
@@ -89,7 +89,7 @@ TEST_F(ConfigAlarmTest, minutes)
 })");
 }
 
-TEST_F(ConfigAlarmTest, hours)
+TEST_F(TestConfigAlarm, hours)
 {
     configAlarm.setHours(10);
     test(R"({
@@ -100,7 +100,29 @@ TEST_F(ConfigAlarmTest, hours)
 })");
 }
 
-TEST_F(ConfigAlarmTest, time)
+TEST_F(TestConfigAlarm, overflow)
+{
+    configAlarm.setHours(25);
+    test(R"({
+    "active": false,
+    "hours": 1,
+    "minutes": 0,
+    "duration_minutes": 59
+})");
+}
+
+TEST_F(TestConfigAlarm, underflow)
+{
+    configAlarm.setMinutes(-1);
+    test(R"({
+    "active": false,
+    "hours": 23,
+    "minutes": 59,
+    "duration_minutes": 59
+})");
+}
+
+TEST_F(TestConfigAlarm, time)
 {
     configAlarm.setHours(13);
     configAlarm.setMinutes(37);
@@ -121,7 +143,7 @@ TEST_F(ConfigAlarmTest, time)
 })");
 }
 
-TEST_F(ConfigAlarmTest, duration)
+TEST_F(TestConfigAlarm, duration)
 {
     configAlarm.setDurationMinutes(10);
     test(R"({
@@ -140,7 +162,7 @@ TEST_F(ConfigAlarmTest, duration)
 })");
 }
 
-TEST_F(ConfigAlarmTest, file)
+TEST_F(TestConfigAlarm, file)
 {
     configAlarm.setFile("filename");
     test(R"({

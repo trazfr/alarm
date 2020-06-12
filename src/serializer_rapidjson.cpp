@@ -16,18 +16,24 @@ constexpr size_t kBufferSize = 65536;
 rapidjson::Value &getOrAddArray(rapidjson::Value &object, const char *key,
                                 rapidjson::Value::AllocatorType &allocator)
 {
-    if (const auto it = object.FindMember(key); it != object.MemberEnd())
+    const auto keyRef = rapidjson::StringRef(key);
+    if (const auto it = object.FindMember(keyRef); it != object.MemberEnd())
     {
-        return it->value;
+        if (it->value.IsArray())
+        {
+            return it->value;
+        }
+        // not an array... best effort
+        object.RemoveMember(it);
     }
-    object.AddMember(rapidjson::StringRef(key), rapidjson::Type::kArrayType, allocator);
+    object.AddMember(keyRef, rapidjson::Type::kArrayType, allocator);
     return getOrAddArray(object, key, allocator);
 }
 
 const rapidjson::Value *getValueFromArrayAt(const rapidjson::Value &object, const char *key, size_t idx)
 {
     const auto it = object.FindMember(key);
-    if (it == object.MemberEnd())
+    if (it == object.MemberEnd() || !it->value.IsArray())
     {
         return nullptr;
     }
@@ -108,43 +114,43 @@ DeserializerRapidJSON::~DeserializerRapidJSON() = default;
 
 std::optional<bool> DeserializerRapidJSON::getBool(const char *key) const
 {
-    if (const auto value = object.FindMember(key); value != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsBool())
     {
-        return {{value->value.GetBool()}};
+        return {{it->value.GetBool()}};
     }
     return {};
 }
 
 std::optional<double> DeserializerRapidJSON::getFloat(const char *key) const
 {
-    if (const auto value = object.FindMember(key); value != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsDouble())
     {
-        return {{value->value.GetDouble()}};
+        return {{it->value.GetDouble()}};
     }
     return {};
 }
 
 std::optional<int64_t> DeserializerRapidJSON::getInt(const char *key) const
 {
-    if (const auto value = object.FindMember(key); value != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsInt64())
     {
-        return {{value->value.GetInt64()}};
+        return {{it->value.GetInt64()}};
     }
     return {};
 }
 
 std::optional<std::string_view> DeserializerRapidJSON::getString(const char *key) const
 {
-    if (const auto value = object.FindMember(key); value != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsString())
     {
-        return {{value->value.GetString(), value->value.GetStringLength()}};
+        return {{it->value.GetString(), it->value.GetStringLength()}};
     }
     return {};
 }
 
 bool DeserializerRapidJSON::getObject(const char *key, Serializable &serializable) const
 {
-    if (const auto it = object.FindMember(key); it != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsObject())
     {
         const DeserializerRapidJSON child{it->value};
         serializable.load(child);
@@ -155,7 +161,7 @@ bool DeserializerRapidJSON::getObject(const char *key, Serializable &serializabl
 
 size_t DeserializerRapidJSON::getArraySize(const char *key) const
 {
-    if (const auto it = object.FindMember(key); it != object.MemberEnd())
+    if (const auto it = object.FindMember(key); it != object.MemberEnd() && it->value.IsArray())
     {
         return it->value.Size();
     }
@@ -164,7 +170,7 @@ size_t DeserializerRapidJSON::getArraySize(const char *key) const
 
 std::optional<double> DeserializerRapidJSON::getFloatFromArrayAt(const char *key, size_t idx) const
 {
-    if (const auto *value = getValueFromArrayAt(object, key, idx))
+    if (const auto *value = getValueFromArrayAt(object, key, idx); value != nullptr && value->IsDouble())
     {
         return {value->GetDouble()};
     }
@@ -173,7 +179,7 @@ std::optional<double> DeserializerRapidJSON::getFloatFromArrayAt(const char *key
 
 std::optional<int64_t> DeserializerRapidJSON::getIntFromArrayAt(const char *key, size_t idx) const
 {
-    if (const auto *value = getValueFromArrayAt(object, key, idx))
+    if (const auto *value = getValueFromArrayAt(object, key, idx); value != nullptr && value->IsInt64())
     {
         return {value->GetInt64()};
     }
@@ -182,7 +188,7 @@ std::optional<int64_t> DeserializerRapidJSON::getIntFromArrayAt(const char *key,
 
 bool DeserializerRapidJSON::getObjectFromArrayAt(const char *key, size_t idx, Serializable &serializable) const
 {
-    if (const auto *value = getValueFromArrayAt(object, key, idx))
+    if (const auto *value = getValueFromArrayAt(object, key, idx); value != nullptr && value->IsObject())
     {
         const DeserializerRapidJSON child{*value};
         serializable.load(child);

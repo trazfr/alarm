@@ -3,14 +3,14 @@
 #include "sensor_thermal.hpp"
 #include "toolbox_io.hpp"
 
+#include <fstream>
+
 class TestSensorThermal : public ::testing::Test
 {
 protected:
     void write(const char *filename, const char *content)
     {
-        FILEUnique fd{std::fopen(filename, "wb+")};
-        ASSERT_TRUE(fd);
-        std::fputs(content, fd.get());
+        std::ofstream{filename} << content;
     }
 
     void TearDown() override
@@ -39,4 +39,38 @@ TEST_F(TestSensorThermal, basic)
 
     const bool refreshed2 = thermal.refresh(now + std::chrono::seconds{10});
     EXPECT_TRUE(refreshed2);
+}
+
+TEST_F(TestSensorThermal, carriageReturn)
+{
+    write("temp", "24000");
+    write("type", "myType\n");
+
+    SensorTermal thermal{"."};
+    thermal.refresh(Clock::now());
+
+    EXPECT_FLOAT_EQ(24., thermal.get());
+    EXPECT_STREQ("myType", thermal.getName());
+}
+
+TEST_F(TestSensorThermal, longName)
+{
+    write("temp", "23500");
+    write("type", "my_very_long_name_which_will_be_truncated_at_some_point_during_a_buffer_overflow");
+
+    SensorTermal thermal{"."};
+    thermal.refresh(Clock::now());
+
+    EXPECT_FLOAT_EQ(23.5, thermal.get());
+    EXPECT_STREQ("my_very_long_name_which_will_be_truncated_at_some_point_during_a", thermal.getName());
+}
+
+TEST_F(TestSensorThermal, missingFile)
+{
+    // this does not throw (in case of disconnection of the sensor from I2C)
+    SensorTermal thermal{"/my/non/existing/path"};
+    thermal.refresh(Clock::now());
+
+    EXPECT_STREQ("", thermal.getName());
+    EXPECT_FLOAT_EQ(0, thermal.get());
 }
