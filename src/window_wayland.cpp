@@ -63,6 +63,10 @@ struct WindowWayland::Impl
         {
             eglTerminate(eglDisplay);
         }
+        if (wlRegistry)
+        {
+            wl_registry_destroy(wlRegistry);
+        }
         if (wlDisplay)
         {
             wl_display_disconnect(wlDisplay);
@@ -73,6 +77,7 @@ struct WindowWayland::Impl
     wl_seat *wlSeat = nullptr;
     wl_pointer *wlPointer = nullptr;
     wl_display *wlDisplay = nullptr;
+    wl_registry *wlRegistry = nullptr;
     wl_shell *wlShell = nullptr;
     wl_surface *wlSurface = nullptr;
     wl_shell_surface *wlShellSurface = nullptr;
@@ -242,14 +247,14 @@ WindowWayland::WindowWayland(int width, int height)
     {
         throw std::runtime_error{"Cannot connect to Wayland display"};
     }
-    const auto registry = wl_display_get_registry(pimpl->wlDisplay);
-    if (registry == nullptr)
+    pimpl->wlRegistry = wl_display_get_registry(pimpl->wlDisplay);
+    if (pimpl->wlRegistry == nullptr)
     {
         throw std::runtime_error{"Cannot get Wayland registry"};
     }
 
     static constexpr wl_registry_listener kRegistryListener = getRegistryListener();
-    wl_registry_add_listener(registry, &kRegistryListener, pimpl.get());
+    wl_registry_add_listener(pimpl->wlRegistry, &kRegistryListener, pimpl.get());
     wl_display_roundtrip(pimpl->wlDisplay);
 
     pimpl->eglDisplay = eglGetDisplay(pimpl->wlDisplay);

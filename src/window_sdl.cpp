@@ -29,17 +29,6 @@ public:
     }
 };
 
-struct SDLDeleter
-{
-    void operator()(SDL_Window *sdl) const
-    {
-        SDL_DestroyWindow(sdl);
-    }
-};
-
-template <typename T>
-using SDLUnique = std::unique_ptr<T, SDLDeleter>;
-
 struct LogSDLString
 {
     explicit LogSDLString(const char *data) : data{data} {}
@@ -160,9 +149,13 @@ struct WindowSDL::Impl
         {
             SDL_GL_DeleteContext(sdlGlContext);
         }
+        if (sdlWindow)
+        {
+            SDL_DestroyWindow(sdlWindow);
+        }
         SDL_Quit();
     }
-    SDLUnique<SDL_Window> sdlWindow;
+    SDL_Window *sdlWindow = nullptr;
     SDL_GLContext sdlGlContext = nullptr;
 };
 
@@ -180,13 +173,13 @@ WindowSDL::WindowSDL(int width, int height)
         std::cerr << "Warning: Linear texture filtering not enabled!" << std::endl;
     }
 
-    pimpl->sdlWindow.reset(SDL_CreateWindow(kWindowName, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL));
+    pimpl->sdlWindow = SDL_CreateWindow(kWindowName, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (pimpl->sdlWindow == nullptr)
     {
         throw SDLError{"Could not create the window"};
     }
 
-    pimpl->sdlGlContext = SDL_GL_CreateContext(pimpl->sdlWindow.get());
+    pimpl->sdlGlContext = SDL_GL_CreateContext(pimpl->sdlWindow);
     if (pimpl->sdlGlContext == nullptr)
     {
         throw SDLError{"Renderer could not be created"};
@@ -201,7 +194,7 @@ void WindowSDL::begin()
 
 void WindowSDL::end()
 {
-    SDL_GL_SwapWindow(pimpl->sdlWindow.get());
+    SDL_GL_SwapWindow(pimpl->sdlWindow);
 }
 
 std::optional<Event> WindowSDL::popEvent()
