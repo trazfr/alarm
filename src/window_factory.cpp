@@ -60,6 +60,9 @@ WindowFactory::~WindowFactory() = default;
 
 Window &WindowFactory::create(std::string_view driver, int width, int height)
 {
+    // clear previous context
+    window.reset();
+
     const auto function = getCreateFunction(driver);
     if (function == nullptr)
     {

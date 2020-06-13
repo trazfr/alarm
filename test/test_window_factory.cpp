@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "event.hpp"
 #include "window.hpp"
 #include "window_factory.hpp"
 
@@ -12,14 +13,25 @@ protected:
     WindowFactory factory;
 };
 
-TEST_F(TestWindowFactory, getAnyDriver)
+TEST_F(TestWindowFactory, getAllDrivers)
 {
-    // there is at least 1 driver (otherwise we cannot compile)
-    const auto &window = factory.create(factory.getDriver(0), 320, 240);
+    // check that all the compiled drivers start
+    for (size_t i = 0; i < factory.getDriverSize(); ++i)
+    {
+        auto &window = factory.create(factory.getDriver(i), 320, 240);
 
-    std::ostringstream str;
-    str << window;
-    EXPECT_FALSE(str.str().empty());
+        const auto nullEvent = window.popEvent();
+
+        // nothing happened, so not event
+        EXPECT_FALSE(nullEvent);
+
+        window.begin();
+        window.end();
+
+        std::ostringstream str;
+        str << window;
+        EXPECT_FALSE(str.str().empty());
+    }
 }
 
 TEST_F(TestWindowFactory, getDebug)

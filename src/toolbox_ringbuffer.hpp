@@ -8,7 +8,7 @@
  * 
  * This is a fixed-size FIFO container
  * 
- * The memory consumption is sizeof(T) * (Capacity + 1)
+ * The memory consumption is sizeof(T) * (Capacity + 1) + 2 * sizeof(void*) + alignment
  */
 template <typename T, size_t Capacity>
 class RingBuffer
@@ -50,7 +50,6 @@ public:
         {
             *write = std::move(t);
             incr(write);
-            return true;
         }
         return result;
     }

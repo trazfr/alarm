@@ -107,8 +107,8 @@ ifeq ("$(D)","2")
 	$(vecho) "Generate lcov"
 	$(Q) rm -rf lcov
 	$(Q) mkdir -p lcov
-	$(Q) lcov --directory $(BUILD_DIR) -c -o lcov/lcov_full.info
-	$(Q) lcov --remove lcov/lcov_full.info -o lcov/lcov.info '/usr/*'
+	$(Q) lcov --directory $(BUILD_BASE) -c -o lcov/lcov_full.info
+	$(Q) lcov --remove lcov/lcov_full.info -o lcov/lcov.info '/usr/*' '$(PWD)/test/*'
 	$(Q) genhtml -o lcov -t "coverage" lcov/lcov.info
 	xdg-open "$(PWD)/lcov/src/index.html" || true
 endif
