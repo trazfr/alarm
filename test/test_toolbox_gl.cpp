@@ -14,6 +14,11 @@ protected:
         factory.create(factory.getDriver(0), 320, 240);
     }
 
+    void TearDown() override
+    {
+        factory.clear();
+    }
+
     WindowFactory factory;
 };
 

@@ -101,6 +101,7 @@ protected:
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
         factory.get().end();
+        factory.clear();
 
         unlink(kFilename);
     }

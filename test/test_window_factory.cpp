@@ -10,6 +10,11 @@
 class TestWindowFactory : public ::testing::Test
 {
 protected:
+    void TearDown() override
+    {
+        factory.clear();
+    }
+
     WindowFactory factory;
 };
 

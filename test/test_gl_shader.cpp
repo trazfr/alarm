@@ -47,6 +47,7 @@ public:
     void TearDown() override
     {
         factory.get().end();
+        factory.clear();
     }
 };
 

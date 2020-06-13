@@ -60,8 +60,7 @@ WindowFactory::~WindowFactory() = default;
 
 Window &WindowFactory::create(std::string_view driver, int width, int height)
 {
-    // clear previous context
-    window.reset();
+    clear();
 
     const auto function = getCreateFunction(driver);
     if (function == nullptr)
@@ -79,6 +78,11 @@ Window &WindowFactory::get() const
         throw std::runtime_error{"No window created"};
     }
     return *window;
+}
+
+void WindowFactory::clear()
+{
+    window = nullptr;
 }
 
 size_t WindowFactory::getDriverSize() const
