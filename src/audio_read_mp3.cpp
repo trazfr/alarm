@@ -1,5 +1,7 @@
 #include "audio_read_mp3.hpp"
 
+#ifndef NO_AUDIO_READ_MP3
+
 #include "error.hpp"
 
 #include <mpg123.h>
@@ -215,3 +217,5 @@ std::ostream &AudioReadMp3::toStream(std::ostream &str) const
 {
     return str << "mpg123 rate=" << getRate() << " channels=" << getChannels() << " encoding=" << pimpl->encoding;
 }
+
+#endif // NO_AUDIO_READ_MP3

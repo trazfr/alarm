@@ -2,7 +2,7 @@
 
 #include "window.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 #include <memory>
 
@@ -29,4 +29,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

@@ -27,14 +27,14 @@ using CreateFunction_t = std::unique_ptr<Window> (*)(int, int);
 
 /// Stores all the compiled drivers. The 1st is the default
 constexpr std::pair<const char *, CreateFunction_t> kDrivers[] = {
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
     {"raspberrypi_hdmi", &createWindow<WindowRaspberryPiHdmi>},
     {"raspberrypi_tft", &createWindow<WindowRaspberryPiTft>},
 #endif
-#ifdef PLATFORM_SDL2
+#ifndef NO_WINDOW_SDL
     {"sdl", &createWindow<WindowSDL>},
 #endif
-#ifdef PLATFORM_WAYLAND
+#ifndef NO_WINDOW_WAYLAND
     {"wayland", &createWindow<WindowWayland>},
 #endif
 };

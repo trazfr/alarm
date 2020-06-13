@@ -2,7 +2,7 @@
 
 #include "window_raspberrypi.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 /**
  * @brief Window to output to the TFT SPI port
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

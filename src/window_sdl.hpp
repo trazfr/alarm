@@ -2,7 +2,7 @@
 
 #include "window.hpp"
 
-#ifdef PLATFORM_SDL2
+#ifndef NO_WINDOW_SDL
 
 #include <memory>
 
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // PLATFORM_SDL2
+#endif // NO_WINDOW_SDL

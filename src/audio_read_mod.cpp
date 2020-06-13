@@ -1,5 +1,7 @@
 #include "audio_read_mod.hpp"
 
+#ifndef NO_AUDIO_READ_MOD
+
 #include "toolbox_io.hpp"
 
 #include <libmodplug/modplug.h>
@@ -152,3 +154,5 @@ std::ostream &AudioReadMod::toStream(std::ostream &str) const
 {
     return str << "mod rate=" << getRate() << " channels=" << getChannels() << " samples=" << getSamples();
 }
+
+#endif // NO_AUDIO_READ_MOD

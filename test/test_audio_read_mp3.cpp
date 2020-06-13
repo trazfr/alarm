@@ -1,6 +1,9 @@
-#include <gtest/gtest.h>
 
 #include "audio_read_mp3.hpp"
+
+#ifndef NO_AUDIO_READ_MP3
+
+#include <gtest/gtest.h>
 
 #include <cstring>
 #include <fstream>
@@ -110,3 +113,5 @@ TEST_F(TestAudioReadMp3, read)
     str << *audio;
     EXPECT_FALSE(str.str().empty());
 }
+
+#endif // NO_AUDIO_READ_MP3

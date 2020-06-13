@@ -2,6 +2,12 @@ PROGRAM			:= alarm
 UNITTEST		:= $(PROGRAM)_test
 
 INSTALL_FOLDER	?= /opt/local/alarm
+USE_WAYLAND		?= $(shell pkg-config wayland-egl --exists && echo 1)
+USE_SDL			?= $(shell pkg-config sdl2 --exists && echo 1)
+USE_LIBMODPLUG	?= $(shell pkg-config libmodplug && echo 1)
+USE_MPG123		?= $(shell pkg-config libmpg123 && echo 1)
+USE_VORBISFILE	?= $(shell pkg-config vorbisfile && echo 1)
+
 ASSETS_FORMAT	:= dds
 
 MODULES			:= src
@@ -30,20 +36,13 @@ ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.$(ASSETS_FORMAT),$(SVG_ASSETS))
 
 CPPFLAGS		:= -std=c++17 -Wall -Wextra -pedantic -Werror \
 					$(shell pkg-config alsa --cflags) \
-					$(shell pkg-config libmodplug --cflags) \
-					$(shell pkg-config libmpg123 --cflags) \
-					$(shell pkg-config vorbisfile --cflags) \
 					$(INCLUDE_MODULES)
 LDFLAGS			:= $(shell pkg-config alsa --libs) \
-					$(shell pkg-config libmodplug --libs) \
-					$(shell pkg-config libmpg123 --libs) \
-					$(shell pkg-config vorbisfile --libs) \
 					-lstdc++fs
 GCOV_CPPFLAGS	= -fprofile-arcs -ftest-coverage
 GCOV_LDFLAGS	= -lgcov
 LDFLAGS_TEST	:= -lgtest \
 					-lpthread
-
 
 # read the DEBUG environment variable DEBUG=<undef>, 0, 1, 2
 D ?= $(DEBUG)
@@ -60,10 +59,31 @@ CPPFLAGS 		+= -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(INSTALL_FOLDER)/assets"'
 RELEASE_MODE	= 1
 endif
 
-# install on raspberry PI
+# audio formats
+ifeq ("$(USE_LIBMODPLUG)","1")
+CPPFLAGS		+= $(shell pkg-config libmodplug --cflags)
+LDFLAGS			+= $(shell pkg-config libmodplug --libs)
+else
+CPPFLAGS		+= -DNO_AUDIO_READ_MOD
+endif
+ifeq ("$(USE_MPG123)","1")
+CPPFLAGS		+= $(shell pkg-config libmpg123 --cflags)
+LDFLAGS			+= $(shell pkg-config libmpg123 --libs)
+else
+CPPFLAGS		+= -DNO_AUDIO_READ_MP3
+endif
+ifeq ("$(USE_VORBISFILE)","1")
+CPPFLAGS		+= $(shell pkg-config vorbisfile --cflags)
+LDFLAGS			+= $(shell pkg-config vorbisfile --libs)
+else
+CPPFLAGS		+= -DNO_AUDIO_READ_OGG
+endif
+
+# install on Raspberry PI (no choice here as there are incompatibilities with GLESv2 / EGL)
 ifneq ("$(wildcard /opt/vc/include/bcm_host.h)","")
 
-	CPPFLAGS	+= -DPLATFORM_RASPBERRYPI \
+	CPPFLAGS	+= -DNO_WINDOW_WAYLAND \
+					-DNO_WINDOW_SDL \
 					-I/opt/vc/include
 	LDFLAGS		+= -L/opt/vc/lib \
 				   -lbcm_host \
@@ -73,17 +93,19 @@ ifneq ("$(wildcard /opt/vc/include/bcm_host.h)","")
 # others: wayland or sdl2
 else
 
-CPPFLAGS		+= $(shell pkg-config glesv2 --cflags)
+CPPFLAGS		+= $(shell pkg-config glesv2 --cflags) -DNO_WINDOW_RASPBERRYPI
 LDFLAGS			+= $(shell pkg-config glesv2 --libs)
-ifeq ("$(shell pkg-config wayland-egl --exists && echo wayland-egl)","wayland-egl")
-	CPPFLAGS	+= -DPLATFORM_WAYLAND \
-					$(shell pkg-config egl wayland-egl --cflags)
+ifeq ("$(USE_WAYLAND)","1")
+	CPPFLAGS	+= $(shell pkg-config egl wayland-egl --cflags)
 	LDFLAGS		+= $(shell pkg-config egl wayland-egl --libs)
+else
+	CPPFLAGS	+= -DNO_WINDOW_WAYLAND
 endif
-ifeq ("$(shell pkg-config sdl2 --exists && echo sdl2)","sdl2")
-	CPPFLAGS	+= -DPLATFORM_SDL2 \
-					$(shell sdl2-config --cflags)
+ifeq ("$(USE_SDL)","1")
+	CPPFLAGS	+= $(shell sdl2-config --cflags)
 	LDFLAGS			+= $(shell sdl2-config --libs)
+else
+	CPPFLAGS	+= -DNO_WINDOW_SDL
 endif
 
 endif

@@ -1,5 +1,6 @@
 #include "audio.hpp"
 
+#include "audio_read.hpp"
 #include "audio_read_mod.hpp"
 #include "audio_read_mp3.hpp"
 #include "audio_read_ogg.hpp"
@@ -24,6 +25,8 @@ constexpr int64_t kBufferTimeUs = 1000 * 1000;
 constexpr int64_t kBufferSamples = kChannels * kRate * kBufferTimeUs / (1000 * 1000);
 constexpr int64_t kAlsaBufferSamples = kBufferSamples * 2;
 
+struct AudioEnd;
+
 /**
  * This class is used to initialize the AudioRead* classes and run open the audio files in a recursive way computed a compile time
  */
@@ -34,7 +37,7 @@ struct AudioFormats;
  * End of recursion
  */
 template <>
-struct AudioFormats<>
+struct AudioFormats<AudioEnd>
 {
     static void loadLib() {}
     static void unloadLib() {}
@@ -71,7 +74,17 @@ struct AudioFormats<T, Tn...>
 /**
  * Definition of the recursions (OGG, then MOD, then MP3)
  */
-using AllFormats = AudioFormats<AudioReadOgg, AudioReadMod, AudioReadMp3>;
+using AllFormats = AudioFormats<
+#ifndef NO_AUDIO_READ_OGG
+    AudioReadOgg,
+#endif
+#ifndef NO_AUDIO_READ_MOD
+    AudioReadMod,
+#endif
+#ifndef NO_AUDIO_READ_MP3
+    AudioReadMp3,
+#endif
+    AudioEnd>;
 
 /**
  * Internal exception which gives some debug from ALSA

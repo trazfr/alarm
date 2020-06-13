@@ -2,7 +2,7 @@
 
 #include "window.hpp"
 
-#ifdef PLATFORM_WAYLAND
+#ifndef NO_WINDOW_WAYLAND
 
 #include <memory>
 
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // PLATFORM_WAYLAND
+#endif // NO_WINDOW_WAYLAND

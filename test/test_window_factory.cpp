@@ -74,7 +74,9 @@ TEST_F(TestWindowFactory, createInvalidScreenSize)
 {
     try
     {
-        factory.create(factory.getDriver(0), 320, 100000);
+        // std::numeric_limits<int>::max() to make SDL crash
+        // std::numeric_limits<int>::min() to make Wayland crash
+        factory.create(factory.getDriver(0), std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
         FAIL() << "Should have thrown";
     }
     catch (const std::runtime_error &)

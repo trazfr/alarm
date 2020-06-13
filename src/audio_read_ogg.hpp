@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NO_AUDIO_READ_OGG
+
 #include "audio_read.hpp"
 #include "toolbox_io.hpp"
 
@@ -45,3 +47,5 @@ private:
 
     std::unique_ptr<Impl> pimpl;
 };
+
+#endif // NO_AUDIO_READ_OGG

@@ -1,6 +1,6 @@
 #include "window_raspberrypi_tft.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 #include "event.hpp"
 #include "toolbox_io.hpp"
@@ -105,4 +105,4 @@ std::ostream &WindowRaspberryPiTft::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

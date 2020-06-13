@@ -1,6 +1,6 @@
 #include "window_raspberrypi.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 #include "error.hpp"
 #include "event.hpp"
@@ -219,4 +219,4 @@ std::ostream &WindowRaspberryPi::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

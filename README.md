@@ -78,7 +78,7 @@ $ apt install libwayland-dev
 
 ## Compile
 
-There are several environment variables to build:
+There are several environment variables to build/install:
 
 - `DEBUG` change the build flags. It can have several values:
   - `0`: turn on compilation optimizations + meant to be used with `make install` (default). You will have to update the generated configuration file by hand to be able to use it without install
@@ -87,6 +87,12 @@ There are several environment variables to build:
 - `VERBOSE` only change the make output, it doesn't do anything on the final binaries:
   - `0` default: turn off verbose compilation output (default)
   - `1`: turn on verbose compilation output
+- `USE_SDL=0` if you don't want to compile against SDL2 (otherwise it is used when detected)
+- `USE_WAYLAND=0` if you don't want to compile against Wayland (otherwise it is used when detected)
+- `USE_LIBMODPLUG=0` if you don't want to compile against libmodplug (there will be no MOD support)
+- `USE_MPG123=0` if you don't want to compile against mpg123 (there will be no MP3 support)
+- `USE_VORBISFILE=0` if you don't want to compile against vorbisfile (there will be no OGG support)
+- `INSTALL_FOLDER` if you want to override the folder where the program is copied when installed. The default is `/opt/local/alarm`
 
 The usual make targets:
 
@@ -104,10 +110,17 @@ $ make clean
 $ DEBUG=1 make -j2
 $ valgrind --tool=callgrind ./alarm config_debug.json
 
-# build and install the program under /opt/local/alarm
+# build and install the program under /opt/local/alarm (default path)
 $ make clean
 $ make install -j2
 $ /opt/local/alarm/alarm config.json
+
+# build without Wayland nor MOD/OGG even if installed
+# install the program and assets under /tmp/alarm
+# it works only if SDL2 is installed
+$ make clean
+$ USE_WAYLAND=0 USE_LIBMODPLUG=0 USE_VORBISFILE=0 INSTALL_FOLDER=/tmp/alarm make install -j2
+$ /tmp/alarm/alarm config.json
 ```
 
 ## Run

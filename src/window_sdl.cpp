@@ -1,6 +1,6 @@
 #include "window_sdl.hpp"
 
-#ifdef PLATFORM_SDL2
+#ifndef NO_WINDOW_SDL
 
 #include "error.hpp"
 #include "event.hpp"
@@ -241,4 +241,4 @@ std::ostream &WindowSDL::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // PLATFORM_SDL2
+#endif // NO_WINDOW_SDL

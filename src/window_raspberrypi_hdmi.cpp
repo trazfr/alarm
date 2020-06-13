@@ -1,6 +1,6 @@
 #include "window_raspberrypi_hdmi.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 #include "event.hpp"
 
@@ -25,4 +25,4 @@ std::ostream &WindowRaspberryPiHdmi::toStream(std::ostream &str) const
     return WindowRaspberryPi::toStream(str);
 }
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

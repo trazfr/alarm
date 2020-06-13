@@ -2,7 +2,7 @@
 
 #include "window_raspberrypi.hpp"
 
-#ifdef PLATFORM_RASPBERRYPI
+#ifndef NO_WINDOW_RASPBERRYPI
 
 /**
  * @brief Window to output to the HDMI port
@@ -24,4 +24,4 @@ protected:
     std::ostream &toStream(std::ostream &str) const override;
 };
 
-#endif // PLATFORM_RASPBERRYPI
+#endif // NO_WINDOW_RASPBERRYPI

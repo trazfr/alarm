@@ -1,5 +1,7 @@
 #include "audio_read_ogg.hpp"
 
+#ifndef NO_AUDIO_READ_OGG
+
 #include <vorbis/vorbisfile.h>
 
 #include <cstring>
@@ -103,3 +105,5 @@ std::ostream &AudioReadOgg::toStream(std::ostream &str) const
 {
     return str << "Ogg Vorbis rate=" << getRate() << " channels=" << getChannels();
 }
+
+#endif // NO_AUDIO_READ_OGG

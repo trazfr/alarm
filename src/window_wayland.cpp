@@ -1,6 +1,6 @@
 #include "window_wayland.hpp"
 
-#ifdef PLATFORM_WAYLAND
+#ifndef NO_WINDOW_WAYLAND
 
 #include "config.hpp"
 #include "error.hpp"
@@ -351,4 +351,4 @@ std::ostream &WindowWayland::toStream(std::ostream &str) const
                << "\n - EGL_EXTENSIONS: " << eglQueryString(pimpl->eglDisplay, EGL_EXTENSIONS);
 }
 
-#endif // PLATFORM_WAYLAND
+#endif // NO_WINDOW_WAYLAND

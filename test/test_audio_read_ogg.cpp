@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
-
 #include "audio_read_ogg.hpp"
+
+#ifndef NO_AUDIO_READ_OGG
+
+#include <gtest/gtest.h>
 
 #include <cstring>
 #include <fstream>
@@ -105,3 +107,5 @@ TEST_F(TestAudioReadOgg, read)
     str << *audio;
     EXPECT_FALSE(str.str().empty());
 }
+
+#endif // NO_AUDIO_READ_OGG
