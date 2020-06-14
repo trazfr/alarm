@@ -55,7 +55,7 @@ CPPFLAGS 		+= -g -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(PWD)/build/assets"'
 LDFLAGS			+= -g
 RELEASE_MODE	= 0
 else
-CPPFLAGS 		+= -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(INSTALL_FOLDER)/assets"'
+CPPFLAGS 		+= -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(INSTALL_FOLDER)/assets"' -DRELEASE_MODE
 RELEASE_MODE	= 1
 endif
 
@@ -123,7 +123,7 @@ endif
 
 all: build_all
 build_all: checkdirs $(PROGRAM) $(ASSETS_COMP)
-test: checkdirs $(UNITTEST)
+test: checkdirs $(UNITTEST) $(ASSETS_COMP)
 	./$(UNITTEST)
 ifeq ("$(D)","2")
 	$(vecho) "Generate lcov"

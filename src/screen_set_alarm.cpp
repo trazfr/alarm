@@ -30,7 +30,7 @@ struct ScreenSetAlarm::Impl
           alarmCounter{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() * 3 / 4, 20, 1, Position::Up, 16)},
           alarmTime{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 5, 1, Position::Center)}
     {
-        switchSelected();
+        setSelected(selected);
     }
 
     RendererSprite arrowUp;
@@ -49,16 +49,21 @@ struct ScreenSetAlarm::Impl
     RendererText alarmTime;
 
     size_t alarmIdx = 0;
-    Selected selected = Selected::Minute;
+    Selected selected = Selected::Hour;
 
     void switchSelected()
     {
         const int selInt = 1 - static_cast<int>(selected);
-        static constexpr char kUnderline[2][6] = {"__", "   __"};
-        selected = Selected{selInt};
-
-        underline.set(kUnderline[selInt]);
+        setSelected(Selected{selInt});
     }
+
+    void setSelected(Selected sel)
+    {
+        static constexpr char kUnderline[2][6] = {"__", "   __"};
+        underline.set(kUnderline[static_cast<int>(sel)]);
+        selected = sel;
+    }
+
     void refreshAlarm(const ConfigAlarm &alarm)
     {
         static constexpr char kActive[][9]{
@@ -208,15 +213,15 @@ void ScreenSetAlarm::handleClick(Position position)
         }
         break;
     case Position::DownLeft:
-        pimpl->selected = Impl::Selected::Hour;
         if (ConfigAlarm *const alarm = getAlarm(*pimpl, ctx))
         {
+            pimpl->setSelected(Impl::Selected::Hour);
             ctx.deleteAlarm(*alarm);
         }
         ctx.getAlarm().reset();
         break;
     case Position::DownRight:
-        pimpl->selected = Impl::Selected::Hour;
+        pimpl->setSelected(Impl::Selected::Hour);
         ctx.newAlarm();
         pimpl->alarmIdx = ctx.getConfig().getAlarms().size() - 1;
         break;

@@ -20,11 +20,16 @@ struct App::Impl
     {
     }
 
-    Config config;
-    FileSerializationHandlerRapidJSON configPersistence;
+    /**
+     * must be at the 1st position
+     * @sa test_app.cpp
+     */
     WindowFactory windowFactory;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<Context> context;
+
+    Config config;
+    FileSerializationHandlerRapidJSON configPersistence;
 };
 
 namespace
@@ -49,7 +54,9 @@ bool handleEvent(App::Impl &pimpl, const Event &event)
 
 Clock::time_point getNextComputedLoop(const Clock::time_point &time, int fps)
 {
-    const auto loopDuration = std::chrono::nanoseconds(static_cast<int64_t>(1000000000. / fps));
+    static constexpr std::chrono::nanoseconds k1Sec = std::chrono::seconds{1};
+
+    const auto loopDuration = k1Sec / fps;
     return time - (time.time_since_epoch() % loopDuration) + loopDuration;
 }
 
@@ -62,11 +69,8 @@ App::App(const char *configurationFile)
 
     if (!pimpl->configPersistence.load(pimpl->config))
     {
-        std::cerr << "Configuration file doesn't exist. Creating it" << std::endl;
-        if (pimpl->windowFactory.getDriverSize() > 0)
-        {
-            pimpl->config.setDisplayDriver(pimpl->windowFactory.getDriver(0));
-        }
+        std::cerr << "Configuration file doesn't exist. Creating " << configurationFile << std::endl;
+        pimpl->config.setDisplayDriver(pimpl->windowFactory.getDriver(0));
         pimpl->configPersistence.save(pimpl->config);
     }
 
