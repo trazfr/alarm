@@ -47,25 +47,30 @@ constexpr ModPlug_Settings kSettings = {
 } // namespace
 
 constexpr char kExtensions[][4] = {
+    "669",
+    "abc",
+    "amf",
+    "ams",
+    "dbm",
     "dmf",
-    "dsf",
     "dsm",
-    "dsp",
     "far",
-    "fsm",
     "it",
     "mdl",
-    "mdr",
     "med",
+    "mid",
     "mod",
+    "mt2",
     "mtm",
     "okt",
+    "pat",
     "psm",
     "ptm",
     "s3m",
-    "s3z",
+    "stm",
+    "ult",
     "umx",
-    "xmz",
+    "xm",
 };
 
 struct AudioReadMod::Impl
@@ -95,14 +100,20 @@ std::unique_ptr<AudioRead> AudioReadMod::create(FILEUnique &file, const char *ex
     }
 
     Impl impl;
+    try
     {
         const MmapFile mmapFile{file.get()};
         impl.mod.reset(ModPlug_Load(mmapFile.content, mmapFile.size));
     }
+    catch (const std::exception &e)
+    {
+        std::cerr << "ModPlug: caught exception while loading the file: " << e.what() << std::endl;
+        return nullptr;
+    }
 
     if (impl.mod == nullptr)
     {
-        std::cerr << "ModPlug could not load the file" << std::endl;
+        std::cerr << "ModPlug: could not load the file as a MOD" << std::endl;
         return nullptr;
     }
 
@@ -113,7 +124,7 @@ std::unique_ptr<AudioRead> AudioReadMod::create(FILEUnique &file, const char *ex
 
 int AudioReadMod::getChannels() const
 {
-    return ModPlug_GetPlayingChannels(pimpl->mod.get());
+    return kSettings.mChannels;
 }
 
 uint64_t AudioReadMod::getSamples() const
@@ -152,7 +163,11 @@ size_t AudioReadMod::readBuffer(char *buffer, size_t bufferSize, bool loop)
 
 std::ostream &AudioReadMod::toStream(std::ostream &str) const
 {
-    return str << "mod rate=" << getRate() << " channels=" << getChannels() << " samples=" << getSamples();
+    return str << "mod type" << ModPlug_GetModuleType(pimpl->mod.get())
+               << "instruments=" << ModPlug_NumInstruments(pimpl->mod.get())
+               << " samples=" << ModPlug_NumSamples(pimpl->mod.get())
+               << " channels=" << ModPlug_NumChannels(pimpl->mod.get())
+               << " duration_ms=" << ModPlug_GetLength(pimpl->mod.get());
 }
 
 #endif // NO_AUDIO_READ_MOD

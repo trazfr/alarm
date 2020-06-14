@@ -314,7 +314,6 @@ Code:
 - Raspberry HDMI must use `/dev/input/mice` for the events
 - Better tests for the graphical (screen + renderer + window) and audio part (but hardware dependent)
 - Internationalization. For now this is in French :)
-- Unittest `audio_read_mod.hpp` / `audio_read_mod.cpp`: play with a tracker to add a 1 second file with a single sound
 - Unittest more classes, but I don't want to use GMock as it would need `virtual` in a lot of methods :/
 - Create a Debian package to ease the deployment once the code is stable enough
 
