@@ -4,10 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include <cstring>
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 
 namespace
 {

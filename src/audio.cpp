@@ -11,7 +11,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <stdexcept>
 
 namespace
 {
