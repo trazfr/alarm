@@ -8,6 +8,7 @@
 #include "renderer_sprite.hpp"
 #include "renderer_text.hpp"
 #include "toolbox_filesystem.hpp"
+#include "toolbox_i18n.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -75,12 +76,15 @@ struct ScreenSetAlarmFile::Impl
           arrowDown{renderer.renderSprite(Asset::Arrow, renderer.getWidth() / 2, 0, Position::Down, 2)},
           arrowLeft{renderer.renderSprite(Asset::Arrow, 0, renderer.getHeight() / 2, Position::Left, 3)},
           arrowRight{renderer.renderSprite(Asset::Arrow, renderer.getWidth(), renderer.getHeight() / 2, Position::Right, 1)},
-          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, "Alarme\nHeure", Position::UpLeft, 16)},
-          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, "Config\n  Date", Position::UpRight, 16)},
+          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, _("Alarm\nHour"), Position::UpLeft, 16)},
+          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, _("Config\n  Date"), Position::UpRight, 16)},
           errorText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 14, 1, Position::Center)},
           alarmFilenameText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, kFilenameSize, 1, Position::Up, 16)},
           alarmNumberText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() * 3 / 4, 9, 1, Position::Up)},
-          filenames{getFiles(musicFolder)}
+          filenames{getFiles(musicFolder)},
+          printAlarmNumber{_("Alarm %d")},
+          errorNoFile{_("   No File")},
+          errorNoAlarm{_("   No Alarm")}
     {
     }
 
@@ -89,7 +93,7 @@ struct ScreenSetAlarmFile::Impl
         if (idx != alarmNumberTextIdx)
         {
             char buffer[32];
-            std::sprintf(buffer, "Alarme %d", static_cast<int>(idx));
+            std::sprintf(buffer, printAlarmNumber, static_cast<int>(idx));
             alarmNumberText.set(buffer);
             alarmNumberTextIdx = idx;
         }
@@ -133,6 +137,10 @@ struct ScreenSetAlarmFile::Impl
     size_t alarmNumberTextIdx = kInvalidIdx;
     size_t alarmFilenameTextIdx = kInvalidIdx;
     std::vector<std::string> filenames;
+
+    const char *printAlarmNumber;
+    const char *errorNoFile;
+    const char *errorNoAlarm;
 };
 
 ScreenSetAlarmFile::ScreenSetAlarmFile(Context &ctx)
@@ -191,13 +199,13 @@ void ScreenSetAlarmFile::run(const Clock::time_point &)
         }
         else if (pimpl->filenames.empty())
         {
-            pimpl->errorText.set("Pas de fichier");
+            pimpl->errorText.set(pimpl->errorNoFile);
             pimpl->errorText.print();
         }
     }
     else
     {
-        pimpl->errorText.set("Pas d'alarme");
+        pimpl->errorText.set(pimpl->errorNoAlarm);
         pimpl->errorText.print();
     }
 

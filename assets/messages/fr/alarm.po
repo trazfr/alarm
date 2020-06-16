@@ -1,0 +1,202 @@
+# French translations for alarm package.
+# Copyright (C) 2020 THE alarm'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the alarm package.
+# Alexandre Blazart <github@blazart.fr>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: alarm 0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-16 02:03+0200\n"
+"PO-Revision-Date: 2020-06-16 00:04+0200\n"
+"Last-Translator: Alexandre Blazart <github@blazart.fr>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/screen_handle_config.cpp:12 src/screen_set_date.cpp:105
+msgid "Sensor"
+msgstr "Capteur"
+
+#: src/screen_handle_config.cpp:13
+msgid ""
+"Save  \n"
+"Config"
+msgstr ""
+"Sauvegarder\n"
+"Config"
+
+#: src/screen_handle_config.cpp:14
+msgid ""
+"  Load\n"
+"Config"
+msgstr ""
+"Charger\n"
+" Config"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:49
+msgid "Fri"
+msgstr "Ven"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:45
+msgid "Mon"
+msgstr "Lun"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:50
+msgid "Sat"
+msgstr "Sam"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:44
+msgid "Sun"
+msgstr "Dim"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:48
+msgid "Thu"
+msgstr "Jeu"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:46
+msgid "Tue"
+msgstr "Mar"
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:47
+msgid "Wed"
+msgstr "Mer"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:56
+msgid "Apr"
+msgstr "Avr"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:60
+msgid "Aug"
+msgstr "Aou"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:64
+msgid "Dec"
+msgstr "Dec"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:54
+msgid "Feb"
+msgstr "Fev"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:53
+msgid "Jan"
+msgstr "Jan"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:59
+msgid "Jul"
+msgstr "Jul"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:58
+msgid "Jun"
+msgstr "Jui"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:55
+msgid "Mar"
+msgstr "Mar"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:57
+msgid "May"
+msgstr "Mai"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:63
+msgid "Nov"
+msgstr "Nov"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:62
+msgid "Oct"
+msgstr "Oct"
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:61
+msgid "Sep"
+msgstr "Sep"
+
+#: src/screen_main.cpp:44 src/screen_main.cpp:96
+#, c-format
+msgid "   Alarm   %02d:%02d"
+msgstr "  Alarme   %02d:%02d"
+
+#: src/screen_main.cpp:45 src/screen_main.cpp:101
+msgid "   Alarmrunning"
+msgstr "  Alarmeen cours"
+
+#: src/screen_set_alarm.cpp:25
+msgid "Hour"
+msgstr "Heure"
+
+#: src/screen_set_alarm.cpp:26
+msgid ""
+"Alarm\n"
+" File"
+msgstr ""
+" Alarme\n"
+"Fichier"
+
+#: src/screen_set_alarm.cpp:29
+msgid "No Alarm"
+msgstr "Pas d'alarme"
+
+#: src/screen_set_alarm.cpp:33
+#, c-format
+msgid " Alarm %d - Disabled"
+msgstr "Alarme %d - Inactive"
+
+#: src/screen_set_alarm.cpp:33
+#, c-format
+msgid " Alarm %d - Enabled"
+msgstr "Alarme %d - Active"
+
+#: src/screen_set_alarm_file.cpp:79
+msgid ""
+"Alarm\n"
+"Hour"
+msgstr ""
+"Alarme\n"
+"Heure"
+
+#: src/screen_set_alarm_file.cpp:80
+msgid ""
+"Config\n"
+"  Date"
+msgstr ""
+"Config\n"
+"  Date"
+
+#: src/screen_set_alarm_file.cpp:85
+#, c-format
+msgid "Alarm %d"
+msgstr "Alarme %d"
+
+#: src/screen_set_alarm_file.cpp:86
+msgid "   No File"
+msgstr "Pas de fichier"
+
+#: src/screen_set_alarm_file.cpp:87
+msgid "   No Alarm"
+msgstr " Pas d'alarme"
+
+#: src/screen_set_date.cpp:104
+msgid ""
+"Alarm\n"
+"File"
+msgstr ""
+"Alarme \n"
+"Fichier"
+
+#: src/screen_set_sensor.cpp:26
+msgid ""
+"Config\n"
+"Date"
+msgstr ""
+"Config\n"
+"Date"
+
+#: src/screen_set_sensor.cpp:27
+msgid "Config"
+msgstr "Config"
+
+#: src/screen_set_sensor.cpp:30
+msgid "       <None>"
+msgstr "      <Aucun>"

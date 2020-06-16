@@ -7,6 +7,7 @@
 #include "renderer_text.hpp"
 #include "sensor.hpp"
 #include "sensor_factory.hpp"
+#include "toolbox_i18n.hpp"
 
 #include <cstring>
 
@@ -22,10 +23,11 @@ struct ScreenSetSensor::Impl
     explicit Impl(Renderer &renderer)
         : arrowUp{renderer.renderSprite(Asset::Arrow, renderer.getWidth() / 2, renderer.getHeight(), Position::Up)},
           arrowDown{renderer.renderSprite(Asset::Arrow, renderer.getWidth() / 2, 0, Position::Down, 2)},
-          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, "Config\nDate", Position::UpLeft, 16)},
-          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, "Config", Position::UpRight, 16)},
+          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, _("Config\nDate"), Position::UpLeft, 16)},
+          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, _("Config"), Position::UpRight, 16)},
           thermalNameText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, kSensorNameSize, 1, Position::Center)},
-          thermalValueText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() * 2 / 5, kThermalSize, 1, Position::Up, 16)}
+          thermalValueText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() * 2 / 5, kThermalSize, 1, Position::Up, 16)},
+          sensorNone{_("       <None>")}
     {
     }
 
@@ -81,6 +83,8 @@ struct ScreenSetSensor::Impl
     float savedThermalValue = -1000;
     const Sensor *savedThermalName = nullptr;
     size_t sensorIdx = kInvalidSensorIdx;
+
+    const char *sensorNone;
 };
 
 ScreenSetSensor::ScreenSetSensor(Context &ctx)
@@ -128,7 +132,7 @@ void ScreenSetSensor::run(const Clock::time_point &)
     else
     {
         pimpl->savedThermalName = nullptr;
-        pimpl->thermalNameText.set("      <Aucun>");
+        pimpl->thermalNameText.set(pimpl->sensorNone);
     }
 
     pimpl->thermalNameText.print();

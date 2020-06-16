@@ -8,8 +8,10 @@
 #include "renderer_sprite.hpp"
 #include "renderer_text.hpp"
 #include "sensor.hpp"
+#include "toolbox_i18n.hpp"
 #include "toolbox_time.hpp"
 
+#include <array>
 #include <cstring>
 
 namespace
@@ -22,30 +24,6 @@ constexpr int kClockPosX = 120;
 constexpr int kClockPosY = 120;
 constexpr int kTextMargin = 10;
 constexpr int kThermalSize = 7;
-
-constexpr char kDow[][4] = {
-    "Dim",
-    "Lun",
-    "Mar",
-    "Mer",
-    "Jeu",
-    "Ven",
-    "Sam",
-};
-constexpr char kMon[][4] = {
-    "Jan",
-    "Fev",
-    "Mar",
-    "Avr",
-    "Mai",
-    "Jui",
-    "Jul",
-    "Aou",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-};
 
 } // namespace
 
@@ -60,7 +38,11 @@ struct ScreenMain::Impl
           dateText{renderer.renderText(kClockPosX, kClockPosY + 25, 15, 1, Position::Down, 16)},
           timeText{renderer.renderText(kClockPosX, kClockPosY - 25, config.displaySeconds() ? 8 : 5, 1, Position::Up)},
           alarmText{renderer.renderText(Renderer::getWidth() - kTextMargin, kTextMargin, 8, 2, Position::DownRight, 16)},
-          thermalText{renderer.renderText(Renderer::getWidth() - kTextMargin, Renderer::getHeight() - kTextMargin, kThermalSize, 1, Position::UpRight, 16)}
+          thermalText{renderer.renderText(Renderer::getWidth() - kTextMargin, Renderer::getHeight() - kTextMargin, kThermalSize, 1, Position::UpRight, 16)},
+          dow{_("Sun"), _("Mon"), _("Tue"), _("Wed"), _("Thu"), _("Fri"), _("Sat")},
+          mon{_("Jan"), _("Feb"), _("Mar"), _("Apr"), _("May"), _("Jun"), _("Jul"), _("Aug"), _("Sep"), _("Oct"), _("Nov"), _("Dec")},
+          alarmHHMM{_("   Alarm   %02d:%02d")},
+          alarmRunning{_("   Alarmrunning")}
     {
     }
 
@@ -71,7 +53,7 @@ struct ScreenMain::Impl
             Buffer_t buffer;
             const struct tm localTime = getLocalTime(timeSinceEpoch);
 
-            std::sprintf(buffer, "%s %02d %s %04d", kDow[localTime.tm_wday], localTime.tm_mday, kMon[localTime.tm_mon], localTime.tm_year + 1900);
+            std::sprintf(buffer, "%s %02d %s %04d", dow[localTime.tm_wday], localTime.tm_mday, mon[localTime.tm_mon], localTime.tm_year + 1900);
             dateText.set(buffer);
 
             std::sprintf(buffer, "%02d:%02d:%02d", localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
@@ -92,12 +74,12 @@ struct ScreenMain::Impl
             {
                 Buffer_t buffer;
                 const auto alarmLocalTime = getLocalTime(*nextAlarm);
-                std::sprintf(buffer, "  Alarme   %02d:%02d", alarmLocalTime.tm_hour, alarmLocalTime.tm_min);
+                std::sprintf(buffer, alarmHHMM, alarmLocalTime.tm_hour, alarmLocalTime.tm_min);
                 alarmText.set(buffer);
             }
             else
             {
-                alarmText.set("  Alarmeen cours");
+                alarmText.set(alarmRunning);
             }
             savedNextAlarm = nextAlarm;
         }
@@ -130,6 +112,11 @@ struct ScreenMain::Impl
     time_t savedTimeSinceEpoch = 0;
     std::optional<Clock::time_point> savedNextAlarm = Clock::from_time_t(0);
     float savedThermalValue = -1000;
+
+    std::array<const char *, 7> dow;
+    std::array<const char *, 12> mon;
+    const char *alarmHHMM;
+    const char *alarmRunning;
 };
 
 ScreenMain::ScreenMain(Context &ctx)

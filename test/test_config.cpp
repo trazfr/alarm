@@ -49,7 +49,6 @@ TEST_F(TestConfig, empty)
     test(R"({
     "alsa_device": "default",
     "assets_folder": "folder",
-    "display_driver": "",
     "display_width": 320,
     "display_height": 240,
     "display_seconds": true,
@@ -64,13 +63,14 @@ TEST_F(TestConfig, empty)
 
 TEST_F(TestConfig, full)
 {
+    config.setDisplayDriver("driver");
     config.setSensorThermal("/dev/null");
     config.getAlarms().emplace_back();
     config.getAlarms().emplace_back();
     test(R"({
     "alsa_device": "default",
     "assets_folder": "folder",
-    "display_driver": "",
+    "display_driver": "driver",
     "display_width": 320,
     "display_height": 240,
     "display_seconds": true,
@@ -103,4 +103,5 @@ TEST_F(TestConfig, helpers)
     EXPECT_EQ("folder/music/bla.mp3", config.getMusic("bla.mp3"));
     EXPECT_EQ("folder/shader/shader.vert", config.getShader("shader.vert"));
     EXPECT_EQ("folder/textures/blip.dds", config.getTexture("blip.dds"));
+    EXPECT_EQ("folder/messages", config.getMessages());
 }

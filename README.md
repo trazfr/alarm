@@ -59,14 +59,16 @@ For the tests:
 
 - [Google Test](https://github.com/google/googletest). License: [BSD](https://github.com/google/googletest/blob/master/LICENSE)
 
-Imagemagick, Inkscape, FFMpeg, LCOV are not linked against any binary.
+Imagemagick, Inkscape, FFMpeg, LCOV and the gettext utils are not linked against any binary.
+
+On Debian or Raspbian (Raspberry PI):
 
 ```bash
 # build main program
 $ apt install build-essential rapidjson-dev libasound2-dev libmodplug-dev libmpg123-dev libvorbis-dev
 
 # build assets
-$ apt install imagemagick inkscape
+$ apt install imagemagick inkscape gettext
 
 # build + run tests
 $ apt install libgtest-dev lcov ffmpeg
@@ -217,6 +219,7 @@ The code is organized this way:
 
 - `src` contains all the C++ source code
 - `test` contains all the C++ unittests
+- `assets/messages` contains files used for internationalization
 - `assets/shader` contains all the shaders 
 - `assets/textures` contains the source of the textures (font + svg)
 - `build` is created at `make` time. It contains the object files and assets
@@ -278,6 +281,24 @@ The code is very basic. We are just displaying sprites and rotating, no wonderfu
 The textures are stored as a "source": TTF or SVG.  
 During the compilation, the DDS files are generated on the fly.
 
+### Internationalization
+
+The project is using [gettext](https://www.gnu.org/software/gettext/) to handle the translations.
+
+Create translations:
+
+```
+$ xgettext --keyword=_ --language=C++ --add-comments --sort-by-file -o assets/messages/alarm.pot src/*.cpp
+$ msginit --input=assets/messages/alarm.pot --locale=fr --output=assets/messages/fr/alarm.po
+```
+
+Update translations:
+
+```
+$ xgettext -j --keyword=_ --language=C++ --add-comments --sort-by-file -o assets/messages/alarm.pot src/*.cpp
+$ msgmerge --update assets/messages/fr/alarm.po assets/messages/alarm.pot
+```
+
 ## Common errors
 
 ### Startup: std::exception: Could not open file
@@ -299,6 +320,7 @@ Check in the `config.json` file the following line:
 
 `assets_folder` should be existing and have 3 sub-folders:
 - `music`: empty by default, where you put your musics
+- `messages`: contains `alarm.mo` files
 - `shader`: contains `*.vert` and `*.frag` files
 - `textures`: contains `*.dds` files
 
@@ -313,7 +335,6 @@ Code:
 
 - Raspberry HDMI must use `/dev/input/mice` for the events
 - Better tests for the graphical (screen + renderer + window) and audio part (but hardware dependent)
-- Internationalization. For now this is in French :)
 - Unittest more classes, but I don't want to use GMock as it would need `virtual` in a lot of methods :/
 - Create a Debian package to ease the deployment once the code is stable enough
 
@@ -322,7 +343,7 @@ Due to an some package delivery:
 - TFT output (need to output with dispman to a layer then copy to `/dev/fb1`)
 - PWM for the TFT backlight?
 - TFT touchscreen input
-- AM2320 sensor (plus a Linux hwmon driver, plus support `/sys/class/hwmon`)
+- AM2320 sensor (find or write a Linux hwmon driver, and support `/sys/class/hwmon` in the program)
 - DS3231 real time clock (there is an [official Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/rtc/rtc-ds1307.c) so it should be transparent)
 
 ## License

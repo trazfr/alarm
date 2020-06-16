@@ -29,10 +29,12 @@ ASSETS_DIR		:= assets/textures assets/music assets/shader
 SVG_ASSETS		:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.svg))
 TTF_ASSETS		:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.ttf))
 SHADER_ASSETS	:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.frag)) $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.vert))
+MESSAGES_ASSETS	:= $(foreach sdir,assets/messages,$(wildcard $(sdir)/*/alarm.po))
 ASSETS_BUILD_DIR:= $(addprefix $(BUILD_BASE)/,$(ASSETS_DIR))
 ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.$(ASSETS_FORMAT),$(SVG_ASSETS)) \
 				   $(patsubst %.ttf,$(BUILD_BASE)/%.$(ASSETS_FORMAT),$(TTF_ASSETS)) \
-				   $(addprefix $(BUILD_BASE)/,$(SHADER_ASSETS))
+				   $(addprefix $(BUILD_BASE)/,$(SHADER_ASSETS)) \
+				   $(patsubst %/alarm.po,$(BUILD_BASE)/%/LC_MESSAGES/alarm.mo,$(MESSAGES_ASSETS))
 
 CPPFLAGS		:= -std=c++17 -Wall -Wextra -pedantic -Werror \
 					$(shell pkg-config alsa --cflags) \
@@ -195,6 +197,11 @@ build/assets/textures/font.$(ASSETS_FORMAT): assets/textures/font.ttf Makefile a
 	$(vecho) "Convert $<"
 	$(Q) convert -extent 128x128 -gravity northwest -background none -fill red -define dds:compression=none -font $< -pointsize 16 \
 		label:"@assets/alphabet.txt" $@
+
+build/%/LC_MESSAGES/alarm.mo: %/alarm.po
+	$(vecho) "msgfmt $<"
+	$(Q) mkdir -p $$(dirname -- $@)
+	$(Q) msgfmt --output-file=$@ $<
 
 build/%.frag: %.frag
 	$(vecho) "CP $<"

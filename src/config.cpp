@@ -213,7 +213,10 @@ void Config::save(Serializer &serializer) const
 {
     serializer.setString(kKeyAlsaDevice, getAlsaDevice());
     serializer.setString(kKeyAssetsFolder, getAssetsFolder());
-    serializer.setString(kKeyDisplayDriver, getDisplayDriver());
+    if (const auto driver = getDisplayDriver(); !driver.empty())
+    {
+        serializer.setString(kKeyDisplayDriver, driver);
+    }
     serializer.setInt(kKeyDisplayWidth, getDisplayWidth());
     serializer.setInt(kKeyDisplayHeight, getDisplayHeight());
     serializer.setBool(kKeyDisplaySeconds, displaySeconds());
@@ -247,4 +250,9 @@ std::string Config::getShader(std::string_view filename) const
 std::string Config::getTexture(std::string_view filename) const
 {
     return getAssetFile(getAssetsFolder(), "textures", filename);
+}
+
+std::string Config::getMessages() const
+{
+    return getAssetFile(getAssetsFolder(), "messages", "");
 }

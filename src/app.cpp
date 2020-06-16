@@ -6,6 +6,7 @@
 #include "renderer.hpp"
 #include "screen.hpp"
 #include "serializer_rapidjson.hpp"
+#include "toolbox_i18n.hpp"
 #include "toolbox_time.hpp"
 #include "window.hpp"
 #include "window_factory.hpp"
@@ -30,6 +31,7 @@ struct App::Impl
 
     Config config;
     FileSerializationHandlerRapidJSON configPersistence;
+    Internationalization i18n;
 };
 
 namespace
@@ -65,8 +67,6 @@ Clock::time_point getNextComputedLoop(const Clock::time_point &time, int fps)
 App::App(const char *configurationFile)
     : pimpl{std::make_unique<Impl>(configurationFile)}
 {
-    std::cerr << "Windows: " << pimpl->windowFactory << std::endl;
-
     if (!pimpl->configPersistence.load(pimpl->config))
     {
         std::cerr << "Configuration file doesn't exist. Creating " << configurationFile << std::endl;
@@ -74,6 +74,10 @@ App::App(const char *configurationFile)
         pimpl->configPersistence.save(pimpl->config);
     }
 
+    pimpl->i18n.setMessagesFolder(pimpl->config.getMessages().c_str());
+    std::cerr << "Internationalization: " << pimpl->i18n << std::endl;
+
+    std::cerr << "Windows: " << pimpl->windowFactory << std::endl;
     auto &window = pimpl->windowFactory.create(pimpl->config.getDisplayDriver(), pimpl->config.getDisplayWidth(), pimpl->config.getDisplayHeight());
     std::cerr << "Created window: " << window << std::endl;
     pimpl->renderer = std::make_unique<Renderer>(pimpl->config);

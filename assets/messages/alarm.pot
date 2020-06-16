@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-16 02:03+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/screen_handle_config.cpp:12 src/screen_set_date.cpp:105
+msgid "Sensor"
+msgstr ""
+
+#: src/screen_handle_config.cpp:13
+msgid ""
+"Save  \n"
+"Config"
+msgstr ""
+
+#: src/screen_handle_config.cpp:14
+msgid ""
+"  Load\n"
+"Config"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:49
+msgid "Fri"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:45
+msgid "Mon"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:50
+msgid "Sat"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:44
+msgid "Sun"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:48
+msgid "Thu"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:46
+msgid "Tue"
+msgstr ""
+
+#: src/screen_main.cpp:42 src/screen_main.cpp:47
+msgid "Wed"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:56
+msgid "Apr"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:60
+msgid "Aug"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:64
+msgid "Dec"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:54
+msgid "Feb"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:53
+msgid "Jan"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:59
+msgid "Jul"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:58
+msgid "Jun"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:55
+msgid "Mar"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:57
+msgid "May"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:63
+msgid "Nov"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:62
+msgid "Oct"
+msgstr ""
+
+#: src/screen_main.cpp:43 src/screen_main.cpp:61
+msgid "Sep"
+msgstr ""
+
+#: src/screen_main.cpp:44 src/screen_main.cpp:96
+#, c-format
+msgid "   Alarm   %02d:%02d"
+msgstr ""
+
+#: src/screen_main.cpp:45 src/screen_main.cpp:101
+msgid "   Alarmrunning"
+msgstr ""
+
+#: src/screen_set_alarm.cpp:25
+msgid "Hour"
+msgstr ""
+
+#: src/screen_set_alarm.cpp:26
+msgid ""
+"Alarm\n"
+" File"
+msgstr ""
+
+#: src/screen_set_alarm.cpp:29
+msgid "No Alarm"
+msgstr ""
+
+#: src/screen_set_alarm.cpp:33
+#, c-format
+msgid " Alarm %d - Disabled"
+msgstr ""
+
+#: src/screen_set_alarm.cpp:33
+#, c-format
+msgid " Alarm %d - Enabled"
+msgstr ""
+
+#: src/screen_set_alarm_file.cpp:79
+msgid ""
+"Alarm\n"
+"Hour"
+msgstr ""
+
+#: src/screen_set_alarm_file.cpp:80
+msgid ""
+"Config\n"
+"  Date"
+msgstr ""
+
+#: src/screen_set_alarm_file.cpp:85
+#, c-format
+msgid "Alarm %d"
+msgstr ""
+
+#: src/screen_set_alarm_file.cpp:86
+msgid "   No File"
+msgstr ""
+
+#: src/screen_set_alarm_file.cpp:87
+msgid "   No Alarm"
+msgstr ""
+
+#: src/screen_set_date.cpp:104
+msgid ""
+"Alarm\n"
+"File"
+msgstr ""
+
+#: src/screen_set_sensor.cpp:26
+msgid ""
+"Config\n"
+"Date"
+msgstr ""
+
+#: src/screen_set_sensor.cpp:27
+msgid "Config"
+msgstr ""
+
+#: src/screen_set_sensor.cpp:30
+msgid "       <None>"
+msgstr ""

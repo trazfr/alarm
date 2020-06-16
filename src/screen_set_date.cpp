@@ -4,6 +4,7 @@
 #include "renderer.hpp"
 #include "renderer_sprite.hpp"
 #include "renderer_text.hpp"
+#include "toolbox_i18n.hpp"
 
 #include <cstring>
 #include <iostream>
@@ -100,8 +101,8 @@ struct ScreenSetDate::Impl
           arrowDown{renderer.renderSprite(Asset::Arrow, renderer.getWidth() / 2, 0, Position::Down, 2)},
           arrowLeft{renderer.renderSprite(Asset::Arrow, 0, renderer.getHeight() / 2, Position::Left, 3)},
           arrowRight{renderer.renderSprite(Asset::Arrow, renderer.getWidth(), renderer.getHeight() / 2, Position::Right, 1)},
-          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, "Alarme \nFichier", Position::UpLeft, 16)},
-          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, "Capteur", Position::UpRight, 16)},
+          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, _("Alarm\nFile"), Position::UpLeft, 16)},
+          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, _("Sensor"), Position::UpRight, 16)},
           errorText{renderer.renderStaticText(renderer.getWidth() / 2, renderer.getHeight() * 7 / 10, kErrCannotChangeDate, Position::Center, 16)},
           dateText{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 19, 1, Position::Center, 16)},
           dateUnderline{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 19, 1, Position::Up, 16)}

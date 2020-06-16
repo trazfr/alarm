@@ -4,13 +4,14 @@
 #include "context.hpp"
 #include "renderer.hpp"
 #include "renderer_text.hpp"
+#include "toolbox_i18n.hpp"
 
 struct ScreenHandleConfig::Impl
 {
     explicit Impl(Renderer &renderer)
-        : previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, "Capteur", Position::UpLeft, 16)},
-          save{renderer.renderStaticText(kMargin, renderer.getHeight() / 2, "Sauvegarder\nConfig", Position::Left, 16)},
-          load{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() / 2, "Charger\nConfig", Position::Right, 16)}
+        : previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, _("Sensor"), Position::UpLeft, 16)},
+          save{renderer.renderStaticText(kMargin, renderer.getHeight() / 2, _("Save  \nConfig"), Position::Left, 16)},
+          load{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() / 2, _("  Load\nConfig"), Position::Right, 16)}
     {
     }
 

@@ -71,6 +71,7 @@ public:
     std::string getMusic(std::string_view filename = {}) const;
     std::string getShader(std::string_view filename = {}) const;
     std::string getTexture(std::string_view filename = {}) const;
+    std::string getMessages() const;
 
 private:
     std::unique_ptr<Impl> pimpl;

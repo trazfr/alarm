@@ -7,6 +7,7 @@
 #include "renderer.hpp"
 #include "renderer_sprite.hpp"
 #include "renderer_text.hpp"
+#include "toolbox_i18n.hpp"
 
 struct ScreenSetAlarm::Impl
 {
@@ -21,14 +22,15 @@ struct ScreenSetAlarm::Impl
           arrowDown{renderer.renderSprite(Asset::Arrow, renderer.getWidth() / 2, 0, Position::Down, 2)},
           arrowLeft{renderer.renderSprite(Asset::Arrow, 0, renderer.getHeight() / 2, Position::Left, 3)},
           arrowRight{renderer.renderSprite(Asset::Arrow, renderer.getWidth(), renderer.getHeight() / 2, Position::Right, 1)},
-          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, "Heure", Position::UpLeft, 16)},
-          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, " Alarme\nFichier", Position::UpRight, 16)},
+          previousScreen{renderer.renderStaticText(kMargin, renderer.getHeight() - kMargin, _("Hour"), Position::UpLeft, 16)},
+          nextScreen{renderer.renderStaticText(renderer.getWidth() - kMargin, renderer.getHeight() - kMargin, _("Alarm\n File"), Position::UpRight, 16)},
           addAlarm{renderer.renderStaticText(renderer.getWidth() - kMargin, kMargin, "+", Position::DownRight)},
           delAlarm{renderer.renderStaticText(kMargin, kMargin, "-", Position::DownLeft)},
-          noAlarm{renderer.renderStaticText(renderer.getWidth() / 2, renderer.getHeight() / 2, "Pas d'alarme", Position::Center)},
+          noAlarm{renderer.renderStaticText(renderer.getWidth() / 2, renderer.getHeight() / 2, _("No Alarm"), Position::Center)},
           underline{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 5, 1, Position::Up)},
           alarmCounter{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() * 3 / 4, 20, 1, Position::Up, 16)},
-          alarmTime{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 5, 1, Position::Center)}
+          alarmTime{renderer.renderText(renderer.getWidth() / 2, renderer.getHeight() / 2, 5, 1, Position::Center)},
+          active{_(" Alarm %d - Disabled"), _(" Alarm %d - Enabled")}
     {
         setSelected(selected);
     }
@@ -51,6 +53,8 @@ struct ScreenSetAlarm::Impl
     size_t alarmIdx = 0;
     Selected selected = Selected::Hour;
 
+    std::array<const char *, 2> active;
+
     void switchSelected()
     {
         const int selInt = 1 - static_cast<int>(selected);
@@ -66,14 +70,9 @@ struct ScreenSetAlarm::Impl
 
     void refreshAlarm(const ConfigAlarm &alarm)
     {
-        static constexpr char kActive[][9]{
-            "Inactive",
-            "Active",
-        };
-
         char buffer[32];
         const int alarmDisplay = alarmIdx >= 100 ? -1 : static_cast<int>(alarmIdx);
-        std::sprintf(buffer, "Alarme %d - %s", alarmDisplay, kActive[alarm.isActive()]);
+        std::sprintf(buffer, active[alarm.isActive()], alarmDisplay);
         alarmCounter.set(buffer);
 
         std::sprintf(buffer, "%02d:%02d", alarm.getHours(), alarm.getMinutes());
