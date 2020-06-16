@@ -8,8 +8,6 @@ USE_LIBMODPLUG	?= $(shell pkg-config libmodplug && echo 1)
 USE_MPG123		?= $(shell pkg-config libmpg123 && echo 1)
 USE_VORBISFILE	?= $(shell pkg-config vorbisfile && echo 1)
 
-ASSETS_FORMAT	:= dds
-
 MODULES			:= src
 INCLUDE_MODULES	:=$(addprefix -I,$(MODULES))
 BUILD_BASE 		:= build
@@ -29,12 +27,12 @@ ASSETS_DIR		:= assets/textures assets/music assets/shader
 SVG_ASSETS		:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.svg))
 TTF_ASSETS		:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.ttf))
 SHADER_ASSETS	:= $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.frag)) $(foreach sdir,$(ASSETS_DIR),$(wildcard $(sdir)/*.vert))
-MESSAGES_ASSETS	:= $(foreach sdir,assets/messages,$(wildcard $(sdir)/*/alarm.po))
+MESSAGES_ASSETS	:= $(foreach sdir,assets/messages,$(wildcard $(sdir)/*.po))
 ASSETS_BUILD_DIR:= $(addprefix $(BUILD_BASE)/,$(ASSETS_DIR))
-ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.$(ASSETS_FORMAT),$(SVG_ASSETS)) \
-				   $(patsubst %.ttf,$(BUILD_BASE)/%.$(ASSETS_FORMAT),$(TTF_ASSETS)) \
+ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.dds,$(SVG_ASSETS)) \
+				   $(patsubst %.ttf,$(BUILD_BASE)/%.dds,$(TTF_ASSETS)) \
 				   $(addprefix $(BUILD_BASE)/,$(SHADER_ASSETS)) \
-				   $(patsubst %/alarm.po,$(BUILD_BASE)/%/LC_MESSAGES/alarm.mo,$(MESSAGES_ASSETS))
+				   $(patsubst %.po,$(BUILD_BASE)/%/LC_MESSAGES/alarm.mo,$(MESSAGES_ASSETS))
 
 CPPFLAGS		:= -std=c++17 -Wall -Wextra -pedantic -Werror \
 					$(shell pkg-config alsa --cflags) \
@@ -49,11 +47,11 @@ LDFLAGS_TEST	:= -lgtest \
 # read the DEBUG environment variable DEBUG=<undef>, 0, 1, 2
 D ?= $(DEBUG)
 ifeq ("$(D)","2")
-CPPFLAGS 		+= -g -O0 $(GCOV_CPPFLAGS) -DALARM_ASSETS_DIR='"$(PWD)/build/assets"'
+CPPFLAGS 		+= -g -O0 $(GCOV_CPPFLAGS) -DALARM_ASSETS_DIR='"$(PWD)/$(BUILD_BASE)/assets"'
 LDFLAGS			+= -g $(GCOV_LDFLAGS)
 RELEASE_MODE	= 0
 else ifeq ("$(D)","1")
-CPPFLAGS 		+= -g -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(PWD)/build/assets"'
+CPPFLAGS 		+= -g -O2 -DNDEBUG -DALARM_ASSETS_DIR='"$(PWD)/$(BUILD_BASE)/assets"'
 LDFLAGS			+= -g
 RELEASE_MODE	= 0
 else
@@ -181,33 +179,33 @@ vpath %.vert $(ASSETS_DIR)
 
 IM_FILTER=-format dds -background none -channel green -fx '0' -channel blue -fx '0' -define dds:compression=none -gravity northwest
 
-build/assets/textures/clock.$(ASSETS_FORMAT): assets/textures/clock.svg Makefile
+$(BUILD_BASE)/assets/textures/clock.dds: assets/textures/clock.svg Makefile
 	$(vecho) "Convert $<"
 	$(Q) inkscape -z $< -e $@.png
 	$(Q) convert -extent 256x256 $(IM_FILTER) $@.png $@
 	$(Q) rm -f $@.png
 
-build/assets/textures/arrow.$(ASSETS_FORMAT): assets/textures/arrow.svg Makefile
+$(BUILD_BASE)/assets/textures/arrow.dds: assets/textures/arrow.svg Makefile
 	$(vecho) "Convert $<"
 	$(Q) inkscape -z $< -e $@.png
 	$(Q) convert -extent 64x64 $(IM_FILTER) $@.png $@
 	$(Q) rm -f $@.png
 
-build/assets/textures/font.$(ASSETS_FORMAT): assets/textures/font.ttf Makefile assets/alphabet.txt
+$(BUILD_BASE)/assets/textures/font.dds: assets/textures/font.ttf Makefile assets/alphabet.txt
 	$(vecho) "Convert $<"
 	$(Q) convert -extent 128x128 -gravity northwest -background none -fill red -define dds:compression=none -font $< -pointsize 16 \
 		label:"@assets/alphabet.txt" $@
 
-build/%/LC_MESSAGES/alarm.mo: %/alarm.po
+$(BUILD_BASE)/assets/messages/%/LC_MESSAGES/alarm.mo: assets/messages/%.po
 	$(vecho) "msgfmt $<"
 	$(Q) mkdir -p $$(dirname -- $@)
 	$(Q) msgfmt --output-file=$@ $<
 
-build/%.frag: %.frag
+$(BUILD_BASE)/%.frag: %.frag
 	$(vecho) "CP $<"
 	$(Q) cp $< $@
 
-build/%.vert: %.vert
+$(BUILD_BASE)/%.vert: %.vert
 	$(vecho) "CP $<"
 	$(Q) cp $< $@
 

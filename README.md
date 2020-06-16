@@ -119,7 +119,7 @@ $ /opt/local/alarm/alarm config.json
 
 # build without Wayland nor MOD/OGG even if installed
 # install the program and assets under /tmp/alarm
-# it works only if SDL2 is installed
+# it works only if SDL2 is installed or if we compile on a Raspberry PI
 $ make clean
 $ USE_WAYLAND=0 USE_LIBMODPLUG=0 USE_VORBISFILE=0 INSTALL_FOLDER=/tmp/alarm make install -j2
 $ /tmp/alarm/alarm config.json
@@ -134,6 +134,10 @@ To run, simply execute the following commands. The config.json is created with d
 ```bash
 # if only DEBUG=1 make or DEBUG=2 make
 $ ./alarm config.json
+# same but force the "C" locale
+$ LC_ALL=C ./alarm config.json
+# same but force the French locale (you must have a french locale installed)
+$ LC_ALL=fr_FR ./alarm config.json
 
 # if make install
 $ /opt/local/alarm/alarm config.json
@@ -287,16 +291,16 @@ The project is using [gettext](https://www.gnu.org/software/gettext/) to handle 
 
 Create translations:
 
-```
+```bash
 $ xgettext --keyword=_ --language=C++ --add-comments --sort-by-file -o assets/messages/alarm.pot src/*.cpp
-$ msginit --input=assets/messages/alarm.pot --locale=fr --output=assets/messages/fr/alarm.po
+$ msginit --input=assets/messages/alarm.pot --locale=fr --output=assets/messages/fr.po
 ```
 
 Update translations:
 
-```
+```bash
 $ xgettext -j --keyword=_ --language=C++ --add-comments --sort-by-file -o assets/messages/alarm.pot src/*.cpp
-$ msgmerge --update assets/messages/fr/alarm.po assets/messages/alarm.pot
+$ msgmerge --update assets/messages/fr.po assets/messages/alarm.pot
 ```
 
 ## Common errors
@@ -318,9 +322,10 @@ Check in the `config.json` file the following line:
 }
 ```
 
-`assets_folder` should be existing and have 3 sub-folders:
-- `music`: empty by default, where you put your musics
+`assets_folder` should be existing and have 4 sub-folders:
+
 - `messages`: contains `alarm.mo` files
+- `music`: empty by default, where you put your musics
 - `shader`: contains `*.vert` and `*.frag` files
 - `textures`: contains `*.dds` files
 
@@ -337,13 +342,14 @@ Code:
 - Better tests for the graphical (screen + renderer + window) and audio part (but hardware dependent)
 - Unittest more classes, but I don't want to use GMock as it would need `virtual` in a lot of methods :/
 - Create a Debian package to ease the deployment once the code is stable enough
+- Organize `src` in subfolders as we are getting near 100 C++ files in it?
 
 Due to an some package delivery:
 
 - TFT output (need to output with dispman to a layer then copy to `/dev/fb1`)
 - PWM for the TFT backlight?
 - TFT touchscreen input
-- AM2320 sensor (find or write a Linux hwmon driver, and support `/sys/class/hwmon` in the program)
+- AM2320 sensor (AM2315's datasheet seems compatible and there is a [Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/iio/humidity/am2315.c))
 - DS3231 real time clock (there is an [official Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/rtc/rtc-ds1307.c) so it should be transparent)
 
 ## License
