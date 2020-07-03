@@ -7,6 +7,7 @@
 #include "toolbox_i18n.hpp"
 
 #include <cstring>
+#include <ctime>
 #include <iostream>
 
 namespace
