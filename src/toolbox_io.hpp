@@ -33,7 +33,7 @@ using FILEUnique = std::unique_ptr<FILE, CloseFile>;
 struct FileUnix
 {
     ~FileUnix();
-    int fd = -1;
+    int fd;
 };
 
 /**
@@ -44,17 +44,23 @@ class MmapFile
 public:
     MmapFile() = default;
     /**
-     * Open by filename
+     * Open by filename (read only)
      */
     explicit MmapFile(const char *filename);
     /**
-     * Mmap an already open C-like FILE
+     * Mmap an already open C-like FILE (read only)
      */
     explicit MmapFile(FILE *file);
     /**
-     * Mmap an already open Unix file descriptor
+     * Mmap an already open Unix file descriptor (read only)
      */
     explicit MmapFile(int fd);
+
+    /**
+     * Mmap an already mmapped file
+     */
+    MmapFile(void *content, size_t size);
+
     ~MmapFile();
 
     void *content = nullptr;

@@ -49,16 +49,25 @@ MmapFile::MmapFile(int fd, const char *filenameDebug)
         throw std::runtime_error{getErrorMessage("Could not open file", filenameDebug)};
     }
     const auto fileSize = lseek(fd, 0, SEEK_END);
+    if (fileSize < 0)
+    {
+        throw std::runtime_error{getErrorMessage("Could not determine file size", filenameDebug)};
+    }
     lseek(fd, 0, SEEK_SET);
 
-    void *const mapped = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (mapped == MAP_FAILED)
-    {
-        throw std::runtime_error{getErrorMessage("Could not mmap the file", filenameDebug)};
-    }
+    MmapFile result = {mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0),
+                       static_cast<size_t>(fileSize)};
+    std::swap(*this, result);
+}
 
-    content = mapped;
-    size = fileSize;
+MmapFile::MmapFile(void *content, size_t size)
+    : content{content},
+      size{size}
+{
+    if (content == nullptr || content == MAP_FAILED)
+    {
+        throw std::runtime_error{"Could not mmap the file"};
+    }
 }
 
 MmapFile::~MmapFile()

@@ -130,5 +130,4 @@ void RendererClock::draw(int hour, int min, int sec, int millis)
     pimpl->vertices.draw<GLfloat>(pimpl->a_rotationFactor, 1, 2, 3);
 
     pimpl->indices.draw();
-    glCheckError();
 }

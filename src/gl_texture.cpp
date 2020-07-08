@@ -58,7 +58,6 @@ GlTexture::GlTexture(const GlTextureLoader &loader)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
-    glCheckError();
 }
 
 GlTexture::GlTexture(GlTexture &&other)

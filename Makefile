@@ -34,10 +34,12 @@ ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.dds,$(SVG_ASSETS)) \
 				   $(addprefix $(BUILD_BASE)/,$(SHADER_ASSETS)) \
 				   $(patsubst %.po,$(BUILD_BASE)/%/LC_MESSAGES/alarm.mo,$(MESSAGES_ASSETS))
 
-CPPFLAGS		:= -std=c++17 -Wall -Wextra -pedantic -Werror \
+CPPFLAGS		:= -save-temps=obj \
+					-std=c++17 -Wall -Wextra -pedantic -Werror \
 					$(shell pkg-config alsa --cflags) \
 					$(INCLUDE_MODULES)
-LDFLAGS			:= $(shell pkg-config alsa --libs) \
+LDFLAGS			:= -save-temps=obj \
+					$(shell pkg-config alsa --libs) \
 					-lstdc++fs
 GCOV_CPPFLAGS	= -fprofile-arcs -ftest-coverage
 GCOV_LDFLAGS	= -lgcov

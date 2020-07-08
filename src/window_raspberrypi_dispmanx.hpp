@@ -1,31 +1,33 @@
 #pragma once
 
-#include "window_raspberrypi.hpp"
+#include "window.hpp"
 
 #ifndef NO_WINDOW_RASPBERRYPI
 
+#include <memory>
+
 /**
- * @brief Window to output to the TFT SPI port
- * 
- * Raspberry PI only
- * 
- * @todo receive a TFT screen to actually test it
+ * @brief Base class for HDMI or TFT output
  */
-class WindowRaspberryPiTft : public WindowRaspberryPi
+class WindowRaspberryPiDispmanx : public Window
 {
 public:
     struct Impl;
 
-    explicit WindowRaspberryPiTft(int width, int height);
-    ~WindowRaspberryPiTft() override;
+    WindowRaspberryPiDispmanx(int width, int height);
+    ~WindowRaspberryPiDispmanx() override;
 
+    void begin() override;
     void end() override;
+
     /**
      * Not implemented
      */
     std::optional<Event> popEvent() override;
 
 protected:
+    uint32_t getDispmanxDisplay() const;
+
     std::ostream &toStream(std::ostream &str) const override;
 
 private:

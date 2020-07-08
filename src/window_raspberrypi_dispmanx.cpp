@@ -1,4 +1,4 @@
-#include "window_raspberrypi.hpp"
+#include "window_raspberrypi_dispmanx.hpp"
 
 #ifndef NO_WINDOW_RASPBERRYPI
 
@@ -41,20 +41,12 @@ public:
     }
 };
 
-Dispmanx createDispanxWindow(int width, int height, bool fullScreen)
+Dispmanx createDispanxWindow(int width, int height)
 {
     Dispmanx result;
-    if (fullScreen)
+    if (graphics_get_display_size(kDisplayNumber, &result.displayWidth, &result.displayHeight) < 0)
     {
-        if (graphics_get_display_size(kDisplayNumber, &result.displayWidth, &result.displayHeight) < 0)
-        {
-            throw std::runtime_error{"graphics_get_display_size() failed"};
-        }
-    }
-    else
-    {
-        result.displayHeight = height;
-        result.displayWidth = width;
+        throw std::runtime_error{"graphics_get_display_size() failed"};
     }
 
     result.dispmanDisplay = vc_dispmanx_display_open(kDisplayNumber);
@@ -95,7 +87,7 @@ Dispmanx createDispanxWindow(int width, int height, bool fullScreen)
 
 } // namespace
 
-struct WindowRaspberryPi::Impl
+struct WindowRaspberryPiDispmanx::Impl
 {
     ~Impl()
     {
@@ -134,7 +126,7 @@ struct WindowRaspberryPi::Impl
     EGLSurface eglSurface = nullptr;
 };
 
-WindowRaspberryPi::WindowRaspberryPi(int width, int height, bool fullScreen)
+WindowRaspberryPiDispmanx::WindowRaspberryPiDispmanx(int width, int height)
     : pimpl{std::make_unique<Impl>()}
 {
     bcm_host_init();
@@ -178,7 +170,7 @@ WindowRaspberryPi::WindowRaspberryPi(int width, int height, bool fullScreen)
         throw EGLError{"eglCreateContext() failed"};
     }
 
-    pimpl->dispmanx = createDispanxWindow(width, height, fullScreen);
+    pimpl->dispmanx = createDispanxWindow(width, height);
     pimpl->eglSurface = eglCreateWindowSurface(pimpl->eglDisplay, eglConfig, &pimpl->dispmanx.eglNativeWindow, nullptr);
     if (pimpl->eglSurface == EGL_NO_SURFACE)
     {
@@ -191,24 +183,30 @@ WindowRaspberryPi::WindowRaspberryPi(int width, int height, bool fullScreen)
     }
 }
 
-WindowRaspberryPi::~WindowRaspberryPi() = default;
+WindowRaspberryPiDispmanx::~WindowRaspberryPiDispmanx() = default;
 
-void WindowRaspberryPi::begin()
+void WindowRaspberryPiDispmanx::begin()
 {
 }
 
-void WindowRaspberryPi::end()
+void WindowRaspberryPiDispmanx::end()
 {
     eglSwapBuffers(pimpl->eglDisplay, pimpl->eglSurface);
 }
 
-uint32_t WindowRaspberryPi::getDispmanxDisplay() const
+std::optional<Event> WindowRaspberryPiDispmanx::popEvent()
+{
+    std::optional<Event> result;
+    return result;
+}
+
+uint32_t WindowRaspberryPiDispmanx::getDispmanxDisplay() const
 {
     static_assert(std::is_same_v<decltype(getDispmanxDisplay()), decltype(pimpl->dispmanx.dispmanDisplay)>);
     return pimpl->dispmanx.dispmanDisplay;
 }
 
-std::ostream &WindowRaspberryPi::toStream(std::ostream &str) const
+std::ostream &WindowRaspberryPiDispmanx::toStream(std::ostream &str) const
 {
     str << "Raspberry PI native display: " << pimpl->dispmanx.displayWidth << 'x' << pimpl->dispmanx.displayHeight
         << "\nRaspberry PI: " << pimpl->dispmanx.eglNativeWindow.width << 'x' << pimpl->dispmanx.eglNativeWindow.height

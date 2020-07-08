@@ -1,7 +1,7 @@
 #include "window_factory.hpp"
 
-#include "window_raspberrypi_hdmi.hpp"
-#include "window_raspberrypi_tft.hpp"
+#include "window_raspberrypi_dispmanx.hpp"
+#include "window_raspberrypi_framebuffer.hpp"
 #include "window_sdl.hpp"
 #include "window_wayland.hpp"
 
@@ -28,8 +28,8 @@ using CreateFunction_t = std::unique_ptr<Window> (*)(int, int);
 /// Stores all the compiled drivers. The 1st is the default
 constexpr std::pair<const char *, CreateFunction_t> kDrivers[] = {
 #ifndef NO_WINDOW_RASPBERRYPI
-    {"raspberrypi_hdmi", &createWindow<WindowRaspberryPiHdmi>},
-    {"raspberrypi_tft", &createWindow<WindowRaspberryPiTft>},
+    {"raspberrypi_framebuffer", &createWindow<WindowRaspberryPiFramebuffer>},
+    {"raspberrypi_dispmanx", &createWindow<WindowRaspberryPiDispmanx>},
 #endif
 #ifndef NO_WINDOW_SDL
     {"sdl", &createWindow<WindowSDL>},

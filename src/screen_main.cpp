@@ -139,7 +139,6 @@ void ScreenMain::leave()
 
 void ScreenMain::run(const Clock::time_point &time)
 {
-
     pimpl->refreshTime(getTimeSinceEpoch(time), ctx.getConfig().displaySeconds());
 
     if (const auto &alarm = ctx.getAlarm(); alarm.isActive())

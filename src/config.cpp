@@ -42,7 +42,7 @@ struct Config::Impl
     std::string displayDriver;
     int displayWidth = 320;
     int displayHeight = 240;
-    int framesPerSecond = 25;
+    int framesPerSecond = 20; // same as fbtft
     std::string temperatureSensor;
     uint8_t clockHandColor[3] = {255, 0, 0};
     std::list<ConfigAlarm> alarms;
