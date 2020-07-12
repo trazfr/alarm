@@ -3,6 +3,7 @@
 #include "event.hpp"
 #include "window.hpp"
 #include "window_factory.hpp"
+#include "windowevent.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -23,9 +24,10 @@ TEST_F(TestWindowFactory, getAllDrivers)
     // check that all the compiled drivers start
     for (size_t i = 0; i < factory.getDriverSize(); ++i)
     {
-        auto &window = factory.create(factory.getDriver(i), 320, 240);
+        factory.create(factory.getDriver(i), "dummy", 320, 240);
+        auto &window = factory.get();
 
-        const auto nullEvent = window.popEvent();
+        const auto nullEvent = factory.getEvent().popEvent();
 
         // nothing happened, so not event
         EXPECT_FALSE(nullEvent);
@@ -62,7 +64,7 @@ TEST_F(TestWindowFactory, createInvalidDriverName)
 {
     try
     {
-        factory.create("INVALID_DRIVER", 320, 240);
+        factory.create("INVALID_DRIVER", "dummy", 320, 240);
         FAIL() << "Should have thrown";
     }
     catch (const std::runtime_error &)
@@ -76,7 +78,7 @@ TEST_F(TestWindowFactory, createInvalidScreenSize)
     {
         // std::numeric_limits<int>::max() to make SDL crash
         // std::numeric_limits<int>::min() to make Wayland crash
-        factory.create(factory.getDriver(0), std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
+        factory.create(factory.getDriver(0), "dummy", std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
         FAIL() << "Should have thrown";
     }
     catch (const std::runtime_error &)

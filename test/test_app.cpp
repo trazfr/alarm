@@ -9,6 +9,7 @@
 #include "event.hpp"
 #include "serializer_rapidjson.hpp"
 #include "window.hpp"
+#include "windowevent.hpp"
 
 #include <gtest/gtest.h>
 
@@ -25,6 +26,27 @@ namespace
 {
 constexpr char kFilename[] = "test_config.json";
 
+class WindowEventMock : public WindowEvent
+{
+public:
+    using Storage = std::list<std::optional<Event>>;
+    explicit WindowEventMock(Storage &events) : events{events} {}
+
+    std::optional<Event> popEvent()
+    {
+        assert(events.empty() == false);
+
+        auto result = events.front();
+        events.pop_front();
+        return result;
+    }
+
+private:
+    virtual std::ostream &toStream(std::ostream &str) const { return str << "/!\\ dummy"; }
+
+    Storage &events;
+};
+
 /**
  * Override the events of the window passed in the constructor
  */
@@ -32,11 +54,15 @@ class MockWindow : public Window
 {
 public:
     explicit MockWindow(std::unique_ptr<Window> window)
-        : window{std::move(window)}
+        : window{std::move(window)},
+          defaultEvent{this->window->createDefaultEvent()}
     {
     }
     ~MockWindow() override
     {
+        while (defaultEvent->popEvent())
+        {
+        }
     }
 
     void begin() override
@@ -49,20 +75,15 @@ public:
     {
         ++numberCallsEnd;
         window->end();
-    }
-
-    std::optional<Event> popEvent() override
-    {
-        // avoid saturation in the real window
-        while (window->popEvent())
+        // avoid saturation
+        while (defaultEvent->popEvent())
         {
         }
+    }
 
-        assert(events.empty() == false);
-
-        auto result = events.front();
-        events.pop_front();
-        return result;
+    std::unique_ptr<WindowEvent> createDefaultEvent()
+    {
+        return std::make_unique<WindowEventMock>(events);
     }
 
     std::ostream &toStream(std::ostream &str) const override
@@ -95,7 +116,8 @@ public:
 
 private:
     std::unique_ptr<Window> window;
-    std::list<std::optional<Event>> events;
+    std::unique_ptr<WindowEvent> defaultEvent;
+    WindowEventMock::Storage events;
 };
 
 } // namespace
@@ -114,6 +136,7 @@ protected:
 
         mockWindow = mockTmp.get();
         windowFactory->window = std::move(mockTmp);
+        windowFactory->windowEvent = windowFactory->window->createDefaultEvent();
     }
 
     void TearDown() override

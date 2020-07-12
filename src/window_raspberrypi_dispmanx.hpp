@@ -21,13 +21,11 @@ public:
     void end() override;
 
     /**
-     * Not implemented
+     * WindowEventLinux
      */
-    std::optional<Event> popEvent() override;
+    std::unique_ptr<WindowEvent> createDefaultEvent() override;
 
 protected:
-    uint32_t getDispmanxDisplay() const;
-
     std::ostream &toStream(std::ostream &str) const override;
 
 private:

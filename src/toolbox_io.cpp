@@ -4,6 +4,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <iostream>
+
 namespace
 {
 
@@ -18,6 +20,17 @@ std::string getErrorMessage(std::string message, const char *filenameDebug)
 }
 
 } // namespace
+
+FileUnix::FileUnix(FileUnix &&other)
+{
+    std::swap(fd, other.fd);
+}
+
+FileUnix &FileUnix::operator=(FileUnix &&other)
+{
+    std::swap(fd, other.fd);
+    return *this;
+}
 
 FileUnix::~FileUnix()
 {
@@ -55,9 +68,8 @@ MmapFile::MmapFile(int fd, const char *filenameDebug)
     }
     lseek(fd, 0, SEEK_SET);
 
-    MmapFile result = {mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0),
-                       static_cast<size_t>(fileSize)};
-    std::swap(*this, result);
+    *this = MmapFile{mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0),
+                     static_cast<size_t>(fileSize)};
 }
 
 MmapFile::MmapFile(void *content, size_t size)
@@ -68,6 +80,19 @@ MmapFile::MmapFile(void *content, size_t size)
     {
         throw std::runtime_error{"Could not mmap the file"};
     }
+}
+
+MmapFile::MmapFile(MmapFile &&other)
+{
+    std::swap(content, other.content);
+    std::swap(size, other.size);
+}
+
+MmapFile &MmapFile::operator=(MmapFile &&other)
+{
+    std::swap(content, other.content);
+    std::swap(size, other.size);
+    return *this;
 }
 
 MmapFile::~MmapFile()

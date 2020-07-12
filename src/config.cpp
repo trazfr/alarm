@@ -16,6 +16,7 @@ constexpr char kKeyDisplayDriver[] = "display_driver";
 constexpr char kKeyDisplayWidth[] = "display_width";
 constexpr char kKeyDisplayHeight[] = "display_height";
 constexpr char kKeyDisplaySeconds[] = "display_seconds";
+constexpr char kKeyEventDriver[] = "event_driver";
 constexpr char kKeyFramesPerSecond[] = "frames_per_second";
 constexpr char kKeySensorThermal[] = "sensor_thermal";
 constexpr char kKeyHandClockColor[] = "hand_clock_color";
@@ -40,6 +41,7 @@ struct Config::Impl
     std::string assetsFolder = ALARM_ASSETS_DIR;
     std::string alsaDevice = "default";
     std::string displayDriver;
+    std::string eventDriver = "default";
     int displayWidth = 320;
     int displayHeight = 240;
     int framesPerSecond = 20; // same as fbtft
@@ -93,6 +95,16 @@ std::string_view Config::getDisplayDriver() const
 void Config::setDisplayDriver(std::string_view driver)
 {
     pimpl->displayDriver = driver;
+}
+
+std::string_view Config::getEventDriver() const
+{
+    return pimpl->eventDriver;
+}
+
+void Config::setEventDriver(std::string_view driver)
+{
+    pimpl->eventDriver = driver;
 }
 
 int Config::getDisplayWidth() const
@@ -181,6 +193,10 @@ void Config::load(const Deserializer &deserializer)
     {
         setDisplaySeconds(*displaySeconds);
     }
+    if (const auto eventDriver = deserializer.getString(kKeyEventDriver))
+    {
+        setEventDriver(*eventDriver);
+    }
     if (const auto fps = deserializer.getInt(kKeyFramesPerSecond))
     {
         setFramesPerSecond(*fps);
@@ -220,6 +236,10 @@ void Config::save(Serializer &serializer) const
     serializer.setInt(kKeyDisplayWidth, getDisplayWidth());
     serializer.setInt(kKeyDisplayHeight, getDisplayHeight());
     serializer.setBool(kKeyDisplaySeconds, displaySeconds());
+    if (const auto driver = getEventDriver(); !driver.empty())
+    {
+        serializer.setString(kKeyEventDriver, driver);
+    }
     serializer.setInt(kKeyFramesPerSecond, getFramesPerSecond());
     if (const auto name = getSensorThermal(); !name.empty())
     {

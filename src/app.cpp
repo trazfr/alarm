@@ -10,6 +10,7 @@
 #include "toolbox_time.hpp"
 #include "window.hpp"
 #include "window_factory.hpp"
+#include "windowevent.hpp"
 
 #include <iostream>
 #include <thread>
@@ -78,8 +79,12 @@ App::App(const char *configurationFile)
     std::cerr << "Internationalization: " << pimpl->i18n << std::endl;
 
     std::cerr << "Windows: " << pimpl->windowFactory << std::endl;
-    auto &window = pimpl->windowFactory.create(pimpl->config.getDisplayDriver(), pimpl->config.getDisplayWidth(), pimpl->config.getDisplayHeight());
-    std::cerr << "Created window: " << window << std::endl;
+    pimpl->windowFactory.create(pimpl->config.getDisplayDriver(),
+                                pimpl->config.getEventDriver(),
+                                pimpl->config.getDisplayWidth(),
+                                pimpl->config.getDisplayHeight());
+    std::cerr << "Created window: " << pimpl->windowFactory.get() << std::endl;
+    std::cerr << "Created event: " << pimpl->windowFactory.getEvent() << std::endl;
     pimpl->renderer = std::make_unique<Renderer>(pimpl->config);
     std::cerr << "Created renderer: " << *pimpl->renderer;
     pimpl->context = std::make_unique<Context>(pimpl->config, pimpl->configPersistence, *pimpl->renderer);
@@ -91,15 +96,12 @@ App::~App() = default;
 
 void App::run()
 {
+    Window &window = pimpl->windowFactory.get();
+    WindowEvent &windowEvent = pimpl->windowFactory.getEvent();
+
     for (bool loop = true; loop;)
     {
         const auto startLoop = Clock::now();
-        Window &window = pimpl->windowFactory.get();
-
-        while (const auto event = window.popEvent())
-        {
-            loop &= handleEvent(*pimpl, *event);
-        }
 
         window.begin();
 
@@ -108,6 +110,11 @@ void App::run()
         pimpl->renderer->end();
 
         window.end();
+
+        while (const auto event = windowEvent.popEvent())
+        {
+            loop &= handleEvent(*pimpl, *event);
+        }
 
         if (const auto fps = pimpl->config.getFramesPerSecond())
         {

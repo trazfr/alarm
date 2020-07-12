@@ -21,9 +21,9 @@ public:
     void end() override;
 
     /**
-     * Maps the mounse
+     * WindowEventRingBuffer
      */
-    std::optional<Event> popEvent() override;
+    std::unique_ptr<WindowEvent> createDefaultEvent() override;
 
 protected:
     std::ostream &toStream(std::ostream &str) const override;

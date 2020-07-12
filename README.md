@@ -155,6 +155,7 @@ The configuration file is a JSON file.
     "display_width": 320,
     "display_height": 240,
     "display_seconds": true,
+    "event_driver": "default",
     "frames_per_second": 25,
     "sensor_thermal": "INT3400 Thermal",
     "hand_clock_color": [
@@ -186,10 +187,14 @@ The entries:
 - `alsa_device` you may change it if you want another ALSA device. `default` should be OK for most.
 - `assets_folder` where the assets (`shader`, `music`, `textures`) are located
 - `display_driver` can be either:
-  - `sdl` for SDL2 driver
-  - `wayland` for very basic Wayland driver
-  - `raspberrypi_hdmi` to output to Raspberry's Dispman. This is only to run in a console. **There is currently no mouse input**
-  - `raspberrypi_tft` to output to `/dev/fb1` which is in my case a TFT touchscreen connected by SPI. You have to perform some configuration on Raspbian before using it. **It is completely untested due to a pending postal delivery and it misses the touchscreen part :/**
+  - `sdl` for SDL2 driver. Uses embedded inputs from SDL2 by default
+  - `wayland` for very basic Wayland driver. Uses embedded inputs from Wayland by default
+  - `raspberrypi_dispmanx` to output to Raspberry's Dispman. This is only to run in a console. Uses inputs from `/dev/input/event*` by default
+  - `raspberrypi_framebuffer` to output to `/dev/fb1` which is in my case a TFT touchscreen connected by SPI. You have to perform some configuration on Raspbian before using it. Uses inputs from `/dev/input/event*` by default
+- `event_driver` can be either:
+  - `default` to use the default events associated to the `display_driver`
+  - `dummy` to never have any input
+  - `linux` to fetch the events from `/dev/input/event*`
 - `display_width` / `display_height` to scale the display, mostly for development
 - `display_seconds` to display the seconds in the main screen along with hours and minutes
 - `frames_per_second` fixed frames per seconds to save CPU. We don't need 200fps for an alarm clock
@@ -257,7 +262,8 @@ Graphical part:
 - `gl_*` handle the interactions with OpenGL
 - `renderer*` render the elements on screen
 - `screen*` 1 class per screen on the application. The main screen is `screen_main.hpp` / `screen_main.cpp`, the others are for configuration
-- `window*` create an OpenGL context and get the events (TODO for Raspberry PI)
+- `window*` create an OpenGL context and display to the output
+- `windowevent*` manage the input events
 
 Misc:
 
@@ -338,17 +344,15 @@ If compiled in `DEBUG=1` or `DEBUG=2`, the folder is `<something>/build/assets`.
 
 Code:
 
-- Raspberry HDMI must use `/dev/input/mice` for the events
-- Better tests for the graphical (screen + renderer + window) and audio part (but hardware dependent)
+- Better tests for the graphical (screen + renderer + window), input (windowevent) and audio part (but hardware dependent)
 - Unittest more classes, but I don't want to use GMock as it would need `virtual` in a lot of methods :/
 - Create a Debian package to ease the deployment once the code is stable enough
 - Organize `src` in subfolders as we are getting near 100 C++ files in it?
 
 Due to an some package delivery:
 
-- TFT output (need to output with dispman to a layer then copy to `/dev/fb1`)
 - PWM for the TFT backlight?
-- TFT touchscreen input
+- TFT touchscreen input (XPT2046)
 - AM2320 sensor (AM2315's datasheet seems compatible and there is a [Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/iio/humidity/am2315.c))
 - DS3231 real time clock (there is an [official Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/rtc/rtc-ds1307.c) so it should be transparent)
 

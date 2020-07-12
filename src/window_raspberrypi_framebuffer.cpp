@@ -3,8 +3,9 @@
 // Mesa drivers don't like eglCreatePbufferSurface() + glReadPixels()
 #ifndef NO_WINDOW_RASPBERRYPI
 
+#include "windowevent_linux.hpp"
+
 #include "error.hpp"
-#include "event.hpp"
 #include "toolbox_gl.hpp"
 #include "toolbox_io.hpp"
 #include "toolbox_time.hpp"
@@ -233,10 +234,9 @@ void WindowRaspberryPiFramebuffer::end()
     }
 }
 
-std::optional<Event> WindowRaspberryPiFramebuffer::popEvent()
+std::unique_ptr<WindowEvent> WindowRaspberryPiFramebuffer::createDefaultEvent()
 {
-    std::optional<Event> result;
-    return result;
+    return std::make_unique<WindowEventLinux>();
 }
 
 std::ostream &WindowRaspberryPiFramebuffer::toStream(std::ostream &str) const

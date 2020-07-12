@@ -5,9 +5,10 @@
 #include <string>
 
 class Window;
+class WindowEvent;
 
 /**
- * @brief Create a Window Object given its driver
+ * @brief Create a Window and WindowEvent objects given their driver name
  */
 class WindowFactory
 {
@@ -18,12 +19,17 @@ public:
     /**
      * Create a window given the driver name
      */
-    Window &create(std::string_view driver, int width, int height);
+    void create(std::string_view displayDriver, std::string_view eventDriver, int width, int height);
 
     /**
      * Get the current window
      */
     Window &get() const;
+
+    /**
+     * Get the current event
+     */
+    WindowEvent &getEvent() const;
 
     /**
      * Remove the current window, removing the OpenGL context
@@ -35,14 +41,14 @@ public:
      * 
      * @sa getDriver()
      */
-    size_t getDriverSize() const;
+    static size_t getDriverSize();
 
     /**
      * Get the driver name corresponding to the index
      * 
      * @sa getDriverSize()
      */
-    std::string_view getDriver(size_t index) const;
+    static std::string_view getDriver(size_t index);
 
     friend std::ostream &operator<<(std::ostream &str, const WindowFactory &obj)
     {
@@ -53,4 +59,5 @@ private:
     std::ostream &toStream(std::ostream &str) const;
 
     std::unique_ptr<Window> window;
+    std::unique_ptr<WindowEvent> windowEvent;
 };

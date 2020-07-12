@@ -5,6 +5,7 @@
 #include "error.hpp"
 #include "event.hpp"
 #include "renderer.hpp"
+#include "windowevent_ringbuffer.hpp"
 
 #include <SDL.h>
 
@@ -157,6 +158,8 @@ struct WindowSDL::Impl
     }
     SDL_Window *sdlWindow = nullptr;
     SDL_GLContext sdlGlContext = nullptr;
+
+    WindowEventRingBuffer::Storage events;
 };
 
 WindowSDL::WindowSDL(int width, int height)
@@ -194,23 +197,26 @@ void WindowSDL::begin()
 
 void WindowSDL::end()
 {
+    SDL_Event event;
+    while (pimpl->events.full() == false && SDL_PollEvent(&event))
+    {
+        if (auto internalEvent = handleEvent(*pimpl->sdlWindow, event))
+        {
+            pimpl->events.push(*internalEvent);
+        }
+    }
+
     SDL_GL_SwapWindow(pimpl->sdlWindow);
 }
 
-std::optional<Event> WindowSDL::popEvent()
+std::unique_ptr<WindowEvent> WindowSDL::createDefaultEvent()
 {
-    std::optional<Event> result;
-    SDL_Event event;
-    while (!result && SDL_PollEvent(&event))
-    {
-        result = handleEvent(*pimpl->sdlWindow, event);
-    }
-    return result;
+    return std::make_unique<WindowEventRingBuffer>(pimpl->events);
 }
 
 std::ostream &WindowSDL::toStream(std::ostream &str) const
 {
-    str << "WindowSDL" << '\n';
+    str << "WindowSDL\n";
     SDL_version version;
     SDL_VERSION(&version);
     str << "Compiled against SDL: " << version << '\n';

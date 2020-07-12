@@ -32,6 +32,11 @@ using FILEUnique = std::unique_ptr<FILE, CloseFile>;
  */
 struct FileUnix
 {
+    explicit FileUnix(int fd = -1) : fd{fd} {}
+
+    explicit FileUnix(FileUnix &&other);
+    FileUnix &operator=(FileUnix &&other);
+
     ~FileUnix();
     int fd;
 };
@@ -43,6 +48,7 @@ class MmapFile
 {
 public:
     MmapFile() = default;
+
     /**
      * Open by filename (read only)
      */
@@ -60,6 +66,9 @@ public:
      * Mmap an already mmapped file
      */
     MmapFile(void *content, size_t size);
+
+    explicit MmapFile(MmapFile &&other);
+    MmapFile &operator=(MmapFile &&other);
 
     ~MmapFile();
 

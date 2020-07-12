@@ -52,7 +52,8 @@ TEST_F(TestConfig, empty)
     "display_width": 320,
     "display_height": 240,
     "display_seconds": true,
-    "frames_per_second": 25,
+    "event_driver": "default",
+    "frames_per_second": 20,
     "hand_clock_color": [
         255,
         0,
@@ -74,7 +75,8 @@ TEST_F(TestConfig, full)
     "display_width": 320,
     "display_height": 240,
     "display_seconds": true,
-    "frames_per_second": 25,
+    "event_driver": "default",
+    "frames_per_second": 20,
     "sensor_thermal": "/dev/null",
     "hand_clock_color": [
         255,

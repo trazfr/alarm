@@ -23,9 +23,9 @@ public:
     void end() override;
 
     /**
-     * Not implemented
+     * WindowEventLinux
      */
-    std::optional<Event> popEvent() override;
+    std::unique_ptr<WindowEvent> createDefaultEvent() override;
 
 protected:
     std::ostream &toStream(std::ostream &str) const override;

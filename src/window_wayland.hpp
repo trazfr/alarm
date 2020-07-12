@@ -6,6 +6,8 @@
 
 #include <memory>
 
+class WindowEvent;
+
 /**
  * @brief Very basic Window using Wayland with an OpenGL context
  */
@@ -21,9 +23,9 @@ public:
     void end() override;
 
     /**
-     * Maps the mounse
+     * WindowEventRingBuffer
      */
-    std::optional<Event> popEvent() override;
+    std::unique_ptr<WindowEvent> createDefaultEvent() override;
 
 protected:
     std::ostream &toStream(std::ostream &str) const override;

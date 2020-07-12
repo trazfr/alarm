@@ -61,7 +61,8 @@ protected:
 
     void SetUp() override
     {
-        factory.create(factory.getDriver(0), width, height).begin();
+        factory.create(factory.getDriver(0), "dummy", width, height);
+        factory.get().begin();
         glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
         program = std::make_unique<GlProgram>(vertexShader, fragmentShader);
 

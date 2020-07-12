@@ -21,6 +21,13 @@ The GPIOs are the ones in `/sys/class/gpio/` ([source](https://elinux.org/RPi_Lo
 
 ## Commands
 
+### Rights
+
+```bash
+# rights to read from /dev/input/event*
+$ sudo usermod -a -G input $USER
+```
+
 ### Enable the framebuffer
 
 ```bash

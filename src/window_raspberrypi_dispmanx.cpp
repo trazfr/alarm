@@ -2,9 +2,9 @@
 
 #ifndef NO_WINDOW_RASPBERRYPI
 
+#include "windowevent_linux.hpp"
+
 #include "error.hpp"
-#include "event.hpp"
-#include "renderer.hpp"
 
 // variadic macros issue... we don't need vcos_logging.h
 #define VCOS_LOGGING_H
@@ -194,16 +194,9 @@ void WindowRaspberryPiDispmanx::end()
     eglSwapBuffers(pimpl->eglDisplay, pimpl->eglSurface);
 }
 
-std::optional<Event> WindowRaspberryPiDispmanx::popEvent()
+std::unique_ptr<WindowEvent> WindowRaspberryPiDispmanx::createDefaultEvent()
 {
-    std::optional<Event> result;
-    return result;
-}
-
-uint32_t WindowRaspberryPiDispmanx::getDispmanxDisplay() const
-{
-    static_assert(std::is_same_v<decltype(getDispmanxDisplay()), decltype(pimpl->dispmanx.dispmanDisplay)>);
-    return pimpl->dispmanx.dispmanDisplay;
+    return std::make_unique<WindowEventLinux>();
 }
 
 std::ostream &WindowRaspberryPiDispmanx::toStream(std::ostream &str) const

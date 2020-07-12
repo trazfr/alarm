@@ -6,6 +6,7 @@
 #include "error.hpp"
 #include "event.hpp"
 #include "toolbox_ringbuffer.hpp"
+#include "windowevent_ringbuffer.hpp"
 
 #include <wayland-client.h>
 #include <wayland-egl.h>
@@ -88,7 +89,7 @@ struct WindowWayland::Impl
     EGLDisplay eglDisplay = nullptr;
     EGLSurface eglSurface = nullptr;
 
-    RingBuffer<Event, 64> events;
+    WindowEventRingBuffer::Storage events;
 
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
@@ -330,17 +331,17 @@ WindowWayland::~WindowWayland() = default;
 
 void WindowWayland::begin()
 {
-    wl_display_dispatch_pending(pimpl->wlDisplay);
 }
 
 void WindowWayland::end()
 {
+    wl_display_dispatch_pending(pimpl->wlDisplay);
     eglSwapBuffers(pimpl->eglDisplay, pimpl->eglSurface);
 }
 
-std::optional<Event> WindowWayland::popEvent()
+std::unique_ptr<WindowEvent> WindowWayland::createDefaultEvent()
 {
-    return pimpl->events.pop();
+    return std::make_unique<WindowEventRingBuffer>(pimpl->events);
 }
 
 std::ostream &WindowWayland::toStream(std::ostream &str) const

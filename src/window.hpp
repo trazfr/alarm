@@ -1,9 +1,10 @@
 #pragma once
 
 #include <iosfwd>
+#include <memory>
 #include <optional>
 
-class Event;
+class WindowEvent;
 
 /**
  * @brief base class for Windows
@@ -24,11 +25,9 @@ public:
     virtual void end() = 0;
 
     /**
-     * Pop the next event
-     * 
-     * If the std::optional is invalid, there is no event
+     * Create the events from the WindowManager
      */
-    virtual std::optional<Event> popEvent() = 0;
+    virtual std::unique_ptr<WindowEvent> createDefaultEvent() = 0;
 
     friend std::ostream &operator<<(std::ostream &str, const Window &window)
     {

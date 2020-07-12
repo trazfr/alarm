@@ -46,6 +46,9 @@ public:
     std::string_view getDisplayDriver() const;
     void setDisplayDriver(std::string_view driver);
 
+    std::string_view getEventDriver() const;
+    void setEventDriver(std::string_view driver);
+
     int getDisplayWidth() const;
     void setDisplayWidth(int w);
 

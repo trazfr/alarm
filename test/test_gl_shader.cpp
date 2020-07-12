@@ -41,7 +41,8 @@ public:
 
     void SetUp() override
     {
-        factory.create(factory.getDriver(0), 320, 240).begin();
+        factory.create(factory.getDriver(0), "dummy", 320, 240);
+        factory.get().begin();
     }
 
     void TearDown() override

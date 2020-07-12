@@ -11,7 +11,7 @@ protected:
     // we need a valid OpenGL context
     void SetUp() override
     {
-        factory.create(factory.getDriver(0), 320, 240);
+        factory.create(factory.getDriver(0), "dummy", 320, 240);
     }
 
     void TearDown() override
