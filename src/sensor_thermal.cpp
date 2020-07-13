@@ -3,6 +3,8 @@
 #include "toolbox_filesystem.hpp"
 #include "toolbox_io.hpp"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <random>
@@ -10,21 +12,20 @@
 namespace
 {
 
-constexpr size_t kBufferSize = 65;
-using Buffer_t = char[kBufferSize];
+using Buffer_t = std::array<char, 65>;
 
 size_t readFile(const char *filename, Buffer_t &buffer)
 {
-    const FILEUnique file{std::fopen(filename, "r")};
+    const FILEUnique file{std::fopen(filename, "rb")};
     if (file)
     {
         // omit the last byte when reading, so we can safely use buffer[size]
-        if (size_t size = std::fread(buffer, sizeof(*buffer), sizeof(buffer) / sizeof(*buffer) - 1, file.get()))
+        if (size_t size = std::fread(buffer.data(), 1, buffer.size() - 1, file.get()))
         {
             buffer[size] = '\0';
-            if (const char *end = std::strchr(buffer, '\n'))
+            if (const char *end = std::strchr(buffer.data(), '\n'))
             {
-                size = end - buffer;
+                size = end - buffer.data();
                 buffer[size] = '\0';
             }
             return size;
@@ -35,7 +36,7 @@ size_t readFile(const char *filename, Buffer_t &buffer)
 
 } // namespace
 
-struct SensorTermal::Impl
+struct SensorThermal::Impl
 {
     std::mt19937 rand{};
     Clock::time_point nextRefresh = Clock::time_point::min();
@@ -44,7 +45,7 @@ struct SensorTermal::Impl
     Buffer_t temperaturePath;
 };
 
-SensorTermal::SensorTermal(std::string_view path)
+SensorThermal::SensorThermal(std::string_view path)
     : pimpl{std::make_unique<Impl>()}
 {
     const fs::path fsPath{path};
@@ -55,23 +56,45 @@ SensorTermal::SensorTermal(std::string_view path)
     if (typeSize > 0)
     {
         const fs::path fileTemp = fsPath / "temp";
-        std::strncpy(pimpl->temperaturePath, fileTemp.c_str(), sizeof(pimpl->temperaturePath));
-        pimpl->temperaturePath[sizeof(pimpl->temperaturePath) - 1] = '\0';
+        std::strncpy(pimpl->temperaturePath.data(), fileTemp.c_str(), pimpl->temperaturePath.size());
+        pimpl->temperaturePath.back() = '\0';
     }
 }
 
-SensorTermal::~SensorTermal() = default;
+SensorThermal::~SensorThermal() = default;
 
-bool SensorTermal::refresh(const Clock::time_point &time)
+std::vector<std::unique_ptr<Sensor>> SensorThermal::create()
+{
+    std::vector<std::unique_ptr<Sensor>> sensors;
+    const fs::path thermal = "/sys/class/thermal";
+    for (auto &dirEntry : fs::directory_iterator{thermal})
+    {
+        if (fs::is_directory(dirEntry) && std::strstr(dirEntry.path().c_str(), "thermal_zone"))
+        {
+            auto sensor = std::make_unique<SensorThermal>(dirEntry.path().native());
+            if (const auto name = sensor->getName();
+                name && name[0] && sensor->refresh(Clock::time_point::min()))
+            {
+                sensors.push_back(std::move(sensor));
+            }
+        }
+    }
+    std::sort(sensors.begin(), sensors.end(),
+              [](const auto &first, const auto &second) { return first->getName() < second->getName(); });
+
+    return sensors;
+}
+
+bool SensorThermal::refresh(const Clock::time_point &time)
 {
     if (time >= pimpl->nextRefresh)
     {
         Buffer_t value;
-        if (readFile(pimpl->temperaturePath, value) > 0)
+        if (readFile(pimpl->temperaturePath.data(), value) > 0)
         {
             char *end = nullptr;
-            const long intValue = std::strtol(value, &end, 10);
-            if (end > value)
+            const long intValue = std::strtol(value.data(), &end, 10);
+            if (end > value.data())
             {
                 pimpl->value = intValue / 1000.;
                 pimpl->nextRefresh = time + std::chrono::milliseconds{(pimpl->rand() % 120000) + 60000};
@@ -83,12 +106,12 @@ bool SensorTermal::refresh(const Clock::time_point &time)
     return pimpl->nextRefresh > Clock::time_point::min();
 }
 
-float SensorTermal::get() const
+float SensorThermal::get() const
 {
     return pimpl->value;
 }
 
-const char *SensorTermal::getName() const
+const char *SensorThermal::getName() const
 {
-    return pimpl->type;
+    return pimpl->type.data();
 }

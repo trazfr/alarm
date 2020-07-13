@@ -25,7 +25,7 @@ TEST_F(TestSensorThermal, basic)
     write("temp", "23000");
     write("type", "mytype");
 
-    SensorTermal thermal{"."};
+    SensorThermal thermal{"."};
 
     EXPECT_FLOAT_EQ(0., thermal.get());
     EXPECT_STREQ("mytype", thermal.getName());
@@ -46,7 +46,7 @@ TEST_F(TestSensorThermal, carriageReturn)
     write("temp", "24000");
     write("type", "myType\n");
 
-    SensorTermal thermal{"."};
+    SensorThermal thermal{"."};
     thermal.refresh(Clock::now());
 
     EXPECT_FLOAT_EQ(24., thermal.get());
@@ -58,7 +58,7 @@ TEST_F(TestSensorThermal, longName)
     write("temp", "23500");
     write("type", "my_very_long_name_which_will_be_truncated_at_some_point_during_a_buffer_overflow");
 
-    SensorTermal thermal{"."};
+    SensorThermal thermal{"."};
     thermal.refresh(Clock::now());
 
     EXPECT_FLOAT_EQ(23.5, thermal.get());
@@ -68,7 +68,7 @@ TEST_F(TestSensorThermal, longName)
 TEST_F(TestSensorThermal, missingFile)
 {
     // this does not throw (in case of disconnection of the sensor from I2C)
-    SensorTermal thermal{"/my/non/existing/path"};
+    SensorThermal thermal{"/my/non/existing/path"};
     thermal.refresh(Clock::now());
 
     EXPECT_STREQ("", thermal.getName());

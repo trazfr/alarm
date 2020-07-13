@@ -2,39 +2,9 @@
 
 #include "sensor.hpp"
 #include "sensor_thermal.hpp"
-#include "toolbox_filesystem.hpp"
 
-#include <algorithm>
-#include <cstring>
 #include <ostream>
 #include <vector>
-
-namespace
-{
-
-std::vector<std::unique_ptr<Sensor>> createThermalSensors()
-{
-    std::vector<std::unique_ptr<Sensor>> sensors;
-    const fs::path thermal = "/sys/class/thermal";
-    for (auto &dirEntry : fs::directory_iterator{thermal})
-    {
-        if (fs::is_directory(dirEntry) && std::strstr(dirEntry.path().c_str(), "thermal_zone"))
-        {
-            auto sensor = std::make_unique<SensorTermal>(dirEntry.path().native());
-            if (const auto name = sensor->getName();
-                name && name[0] && sensor->refresh(Clock::time_point::min()))
-            {
-                sensors.push_back(std::move(sensor));
-            }
-        }
-    }
-    std::sort(sensors.begin(), sensors.end(),
-              [](const auto &first, const auto &second) { return first->getName() < second->getName(); });
-
-    return sensors;
-}
-
-} // namespace
 
 struct SensorFactory::Impl
 {
@@ -44,7 +14,7 @@ struct SensorFactory::Impl
 SensorFactory::SensorFactory()
     : pimpl{std::make_unique<Impl>()}
 {
-    pimpl->thermal = createThermalSensors();
+    pimpl->thermal = SensorThermal::create();
 }
 
 SensorFactory::~SensorFactory() = default;
