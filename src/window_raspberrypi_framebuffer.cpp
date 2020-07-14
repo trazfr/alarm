@@ -127,8 +127,8 @@ WindowRaspberryPiFramebuffer::WindowRaspberryPiFramebuffer(int width, int height
         throw std::runtime_error{"ioctl(FBIOGET_VSCREENINFO) failed"};
     }
 
-    pimpl->mmaped.content = mmap(nullptr, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd.fd, 0);
-    pimpl->mmaped.size = finfo.smem_len;
+    pimpl->mmaped = MmapFile{mmap(nullptr, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd.fd, 0),
+                             finfo.smem_len};
 
     if (vinfo.bits_per_pixel != kFramebufferBitsPerPixel)
     {
