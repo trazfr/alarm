@@ -22,6 +22,7 @@ struct WindowEventLinux::Impl
         EventFilename_t filename;
         EventName_t name;
 
+        uint16_t btn = 0;
         int32_t x = 0;
         int32_t y = 0;
 
@@ -57,19 +58,6 @@ bool getBit(const T *c, unsigned int bitNum)
     return (c[bitNum / getBitSize<T>()] >> (bitNum % getBitSize<T>())) & 0x01;
 }
 
-bool isPropOk(int fd)
-{
-    long bitsProp[getNumIntegers<long>(INPUT_PROP_CNT)] = {};
-    if (ioctl(fd, EVIOCGPROP(sizeof(bitsProp)), bitsProp) < 0)
-    {
-        // if the kernet doesn't support it, we don't care...
-        return errno == EINVAL;
-    }
-    // in fact we don't care much if it is a INPUT_PROP_DIRECT (touchscreen) or a INPUT_PROP_POINTER (touchpad)
-    // we use the touchpad as a touchscreen
-    return getBit(bitsProp, INPUT_PROP_DIRECT) || getBit(bitsProp, INPUT_PROP_POINTER);
-}
-
 bool isEvOk(int fd)
 {
     long bits[getNumIntegers<long>(EV_CNT)] = {};
@@ -94,16 +82,23 @@ bool isEvAbsOk(int fd)
     return getBit(bitsAbs, ABS_X) && getBit(bitsAbs, ABS_Y);
 }
 
-bool isEvKeyOk(int fd)
+uint16_t getEvKey(int fd)
 {
     long bitsKey[getNumIntegers<long>(KEY_CNT)] = {};
     if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(bitsKey)), bitsKey) < 0)
     {
-        return false;
+        return 0;
     }
 
-    // we need BTN_LEFT
-    return getBit(bitsKey, BTN_LEFT);
+    // we need either BTN_LEFT or BTN_TOUCH
+    for (const unsigned int btn : {BTN_LEFT, BTN_TOUCH})
+    {
+        if (getBit(bitsKey, btn))
+        {
+            return btn;
+        }
+    }
+    return 0;
 }
 
 std::tuple<int32_t, int32_t, int32_t> getEvAbsBoundaries(int fd, int abs)
@@ -145,7 +140,13 @@ EventInfo findEvent()
         }
         result.name.back() = '\0';
 
-        if ((isPropOk(fd.fd) && isEvOk(fd.fd) && isEvAbsOk(fd.fd) && isEvKeyOk(fd.fd)) == false)
+        if ((isEvOk(fd.fd) && isEvAbsOk(fd.fd)) == false)
+        {
+            continue;
+        }
+
+        result.btn = getEvKey(fd.fd);
+        if (result.btn == 0)
         {
             continue;
         }
@@ -178,7 +179,7 @@ bool processEvent(EventInfo &info, struct input_event event)
         }
         break;
     case EV_KEY:
-        if (event.code == BTN_LEFT && event.value == 0)
+        if (event.code == info.btn && event.value == 1)
         {
             return true;
         }

@@ -1,6 +1,10 @@
 # Setup
 
-This file is to setup the Rasperry PI
+This file is to setup the Rasperry PI. Hardware:
+
+ - Raspberry PI 1B
+ - TFT screen controller: ILI9341
+ - Touchscreen controller: XPT2046 (Linux driver: ADS7846)
 
 ## Wiring
 
@@ -8,7 +12,7 @@ The GPIOs are the ones in `/sys/class/gpio/` ([source](https://elinux.org/RPi_Lo
 
 ![GPIO headers](40pingpio.svg)
 
-| TFT      | PI                    |
+| TFT      | PI (SPI0.0)           |
 |----------|-----------------------|
 | LED      | Pin12 (GPIO18)        |
 | SCK      | Pin23 (GPIO11) = SCLK |
@@ -19,6 +23,14 @@ The GPIOs are the ones in `/sys/class/gpio/` ([source](https://elinux.org/RPi_Lo
 | GND      | Pin25 (GND)           |
 | VCC      | Pin17 (3.3V)          |
 
+| Touch    | PI (SPI0.1)           |
+|----------|-----------------------|
+| T_IRQ    | Pin11 (GPIO17)        |
+| T_DO     | Pin21 (GPIO9) = MISO  |
+| T_DIN    | Pin19 (GPIO10) = MOSI |
+| T_CS     | Pin26 (GPIO7) = CE1   |
+| T_CLK    | Pin23 (GPIO11) = SCLK |
+
 ## Commands
 
 ### Rights
@@ -28,14 +40,19 @@ The GPIOs are the ones in `/sys/class/gpio/` ([source](https://elinux.org/RPi_Lo
 $ sudo usermod -a -G input $USER
 ```
 
-### Enable the framebuffer
+### Enable the TFT framebuffer
 
 ```bash
-# in root
-$ sed -i 's/^#\(dtparam=spi=on\)$/\1/' /boot/config.txt
+# as root
+$ echo "dtparam=spi=on" >> /boot/config.txt
 $ echo "fbtft_device" >| /etc/modules-load.d/fbtft_device.conf
-$ echo "options fbtft_device name=fb_ili9341 gpios=reset:25,dc:24,led:18 speed=48000000 txbuflen=32768 custom=1 rotate=90 fps=20 bgr=0" >| /etc/modprobe.d/fbtft.conf
+$ echo "options fbtft_device name=fb_ili9341 gpios=reset:25,dc:24,led:18 speed=64000000 txbuflen=32768 custom=1 rotate=90 fps=20 bgr=0" >| /etc/modprobe.d/fbtft.conf
 $ systemctl disable getty@tty1.service
+```
 
-$ sudo reboot
+### Enable the touchscreen
+
+```bash
+# as root
+$ echo "dtoverlay=ads7846,penirq=17,speed=100000,penirq_pull=2,xohms=80,swapxy=1" >> /boot/config.txt
 ```
