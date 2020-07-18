@@ -56,3 +56,29 @@ $ systemctl disable getty@tty1.service
 # as root
 $ echo "dtoverlay=ads7846,penirq=17,speed=100000,penirq_pull=2,xohms=80,swapxy=1" >> /boot/config.txt
 ```
+
+### Temperature + humidity
+
+I have a AM2320, but the Linux module is am2315, but it is not part of Raspberry's packages. We can see that the dependencies are here.
+
+Install module:
+
+```bash
+sudo apt-get install raspberrypi-kernel-headers
+$ mkdir /dev/shm/build_am2315
+$ cd /dev/shm/build_am2315
+$ curl -O https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/drivers/iio/humidity/am2315.c
+$ echo 'obj-m+=am2315.o' >| Makefile
+$ make -C /lib/modules/$(uname -r)/build M=$PWD modules
+$ sudo make -C /lib/modules/$(uname -r)/build M=$PWD modules_install
+$ sudo depmod -A
+```
+
+Configure it:
+
+```bash
+# as root
+$ echo "dtparam=i2c=on" >> /boot/config.txt
+$ echo "am2315" >| /etc/modules-load.d/am2315.conf
+$ echo 'ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="bcm2835 I2C adapter", ATTR{new_device}="am2315 0x5c"' >| /etc/udev/rules.d/99-i2c-am2315.rules
+```

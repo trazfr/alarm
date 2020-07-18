@@ -352,7 +352,6 @@ Code:
 Due to an some package delivery:
 
 - PWM for the TFT backlight?
-- AM2320 sensor (AM2315's datasheet seems compatible and there is a [Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/iio/humidity/am2315.c))
 - DS3231 real time clock (there is an [official Linux driver](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/rtc/rtc-ds1307.c) so it should be transparent)
 
 ## License
