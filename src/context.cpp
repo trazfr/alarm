@@ -64,9 +64,9 @@ Context::Context(Config &config, SerializationHandler &configPersistence, Render
     : pimpl{std::make_unique<Impl>(*this, config, configPersistence, renderer)}
 {
     resetSensors();
-    std::cerr << "Sensors: " << getSensorFactory();
+    std::cerr << getSensorFactory();
 
-    if (const auto sensor = getThermalSensor())
+    if (const auto sensor = getTemperatureSensor())
     {
         std::cerr << "Using " << sensor->getName() << std::endl;
     }
@@ -158,9 +158,9 @@ void Context::resetSensors()
 {
     pimpl->thermalSensor = -1;
     const auto thermalSensor = getConfig().getSensorThermal();
-    for (size_t i = pimpl->sensorFactory.getThermalSize(); i--;)
+    for (size_t i = pimpl->sensorFactory.getSize(SensorFactory::Type::Temperature); i--;)
     {
-        if (const auto sensor = pimpl->sensorFactory.getThermal(i))
+        if (const auto sensor = pimpl->sensorFactory.get(SensorFactory::Type::Temperature, i))
         {
             if (sensor->getName() == thermalSensor)
             {
@@ -175,9 +175,9 @@ SensorFactory &Context::getSensorFactory()
     return pimpl->sensorFactory;
 }
 
-Sensor *Context::getThermalSensor()
+Sensor *Context::getTemperatureSensor()
 {
-    return getSensorFactory().getThermal(pimpl->thermalSensor);
+    return getSensorFactory().get(SensorFactory::Type::Temperature, pimpl->thermalSensor);
 }
 
 void Context::handleClick(float x, float y)
@@ -189,7 +189,7 @@ void Context::run(const Clock::time_point &time)
 {
     pimpl->alarm.run(time);
     getScreen().run(time);
-    if (const auto sensor = getThermalSensor())
+    if (const auto sensor = getTemperatureSensor())
     {
         sensor->refresh(time);
     }

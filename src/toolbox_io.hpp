@@ -79,6 +79,21 @@ private:
     MmapFile(int fd, const char *filenameDebug);
 };
 
+size_t copyBuffer(void *dest, size_t destSize, const void *src, size_t srcSize);
+template <typename T, size_t S>
+inline size_t copyBuffer(std::array<T, S> &dest, std::string_view src)
+{
+    return copyBuffer(dest.data(), sizeof(dest), src.data(), src.size());
+}
+
+/**
+ * Read max bufferSize-1 from the filename.
+ * The resulting string is always null-terminated
+ * 
+ * @return the number of bytes (not counting the last '\0')
+ */
+size_t readFile(const char *filename, char *buffer, size_t bufferSize);
+
 /**
  * Read the whole content of a file
  */

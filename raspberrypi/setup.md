@@ -5,6 +5,7 @@ This file is to setup the Rasperry PI. Hardware:
  - Raspberry PI 1B
  - TFT screen controller: ILI9341
  - Touchscreen controller: XPT2046 (Linux driver: ADS7846)
+ - Temperature / humidity sensor
 
 ## Wiring
 

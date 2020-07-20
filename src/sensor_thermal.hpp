@@ -7,7 +7,7 @@
 #include <vector>
 
 /**
- * @brief sensor for path /sys/class/thermal in Linux
+ * @brief sensor for path /sys/class/thermal in Linux (Thermal)
  * 
  * @arg refresh rate is random between 2min and 3min
  * @arg the unit is Celcius degree
@@ -20,6 +20,9 @@ public:
     explicit SensorThermal(std::string_view path);
     ~SensorThermal() override;
 
+    /**
+     * Read from /sys/class/thermal/thermal_zoneXXX/(temp|type)
+     */
     static std::vector<std::unique_ptr<Sensor>> create();
 
     bool refresh(const Clock::time_point &time) override;

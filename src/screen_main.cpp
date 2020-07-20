@@ -147,7 +147,7 @@ void ScreenMain::run(const Clock::time_point &time)
         pimpl->alarmText.print();
     }
 
-    if (const auto thermal = ctx.getThermalSensor())
+    if (const auto thermal = ctx.getTemperatureSensor())
     {
         pimpl->refreshThermal(thermal->get());
         pimpl->thermalText.print();

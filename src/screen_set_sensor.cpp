@@ -99,9 +99,9 @@ void ScreenSetSensor::enter()
     pimpl = std::make_unique<Impl>(ctx.getRenderer());
 
     SensorFactory &factory = ctx.getSensorFactory();
-    for (size_t i = factory.getThermalSize(); i--;)
+    for (size_t i = factory.getSize(SensorFactory::Type::Temperature); i--;)
     {
-        if (factory.getThermal(i) == ctx.getThermalSensor())
+        if (factory.get(SensorFactory::Type::Temperature, i) == ctx.getTemperatureSensor())
         {
             pimpl->sensorIdx = i;
             break;
@@ -121,7 +121,7 @@ void ScreenSetSensor::run(const Clock::time_point &)
     pimpl->previousScreen.print();
     pimpl->nextScreen.print();
 
-    if (Sensor *sensor = factory.getThermal(pimpl->sensorIdx))
+    if (Sensor *sensor = factory.get(SensorFactory::Type::Temperature, pimpl->sensorIdx))
     {
         pimpl->refreshThermalName(sensor);
         pimpl->thermalNameText.print();
@@ -136,7 +136,7 @@ void ScreenSetSensor::run(const Clock::time_point &)
     }
 
     pimpl->thermalNameText.print();
-    if (factory.getThermal(pimpl->sensorIdx + 1))
+    if (factory.get(SensorFactory::Type::Temperature, pimpl->sensorIdx + 1))
     {
         pimpl->arrowUp.print();
     }
@@ -157,7 +157,7 @@ void ScreenSetSensor::handleClick(Position position)
         ctx.nextScreen();
         break;
     case Position::Up:
-        if (const auto sensor = ctx.getSensorFactory().getThermal(pimpl->sensorIdx + 1))
+        if (const auto sensor = ctx.getSensorFactory().get(SensorFactory::Type::Temperature, pimpl->sensorIdx + 1))
         {
             ++(pimpl->sensorIdx);
             ctx.getConfig().setSensorThermal(sensor->getName());
@@ -165,7 +165,7 @@ void ScreenSetSensor::handleClick(Position position)
         }
         break;
     case Position::Down:
-        if (const auto sensor = ctx.getSensorFactory().getThermal(pimpl->sensorIdx - 1))
+        if (const auto sensor = ctx.getSensorFactory().get(SensorFactory::Type::Temperature, pimpl->sensorIdx - 1))
         {
             --(pimpl->sensorIdx);
             ctx.getConfig().setSensorThermal(sensor->getName());

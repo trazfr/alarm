@@ -4,7 +4,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include <iostream>
+#include <cstring>
 
 namespace
 {
@@ -17,6 +17,31 @@ std::string getErrorMessage(std::string message, const char *filenameDebug)
         message += filenameDebug;
     }
     return message;
+}
+
+std::pair<FileUnix, size_t> openFileWithSize(int fd)
+{
+    FileUnix fdResult{fd};
+    size_t resultSize = 0;
+
+    if (fdResult.fd >= 0)
+    {
+        resultSize = lseek(fdResult.fd, 0, SEEK_END);
+        if (resultSize > 0)
+        {
+            lseek(fdResult.fd, 0, SEEK_SET);
+        }
+    }
+
+    return std::pair<FileUnix, size_t>{
+        std::move(fdResult),
+        resultSize,
+    };
+}
+
+std::pair<FileUnix, size_t> openFileWithSize(const char *filename)
+{
+    return openFileWithSize(open(filename, O_RDONLY, 0));
 }
 
 } // namespace
@@ -57,19 +82,12 @@ MmapFile::MmapFile(int fd)
 
 MmapFile::MmapFile(int fd, const char *filenameDebug)
 {
-    if (fd < 0)
+    const auto [fdUnix, size] = openFileWithSize(fd);
+    if (size == 0)
     {
-        throw std::runtime_error{getErrorMessage("Could not open file", filenameDebug)};
+        throw std::runtime_error{getErrorMessage("Could not read file", filenameDebug)};
     }
-    const auto fileSize = lseek(fd, 0, SEEK_END);
-    if (fileSize < 0)
-    {
-        throw std::runtime_error{getErrorMessage("Could not determine file size", filenameDebug)};
-    }
-    lseek(fd, 0, SEEK_SET);
-
-    *this = MmapFile{mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0),
-                     static_cast<size_t>(fileSize)};
+    *this = MmapFile{mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fdUnix.fd, 0), size};
 }
 
 MmapFile::MmapFile(void *content, size_t size)
@@ -103,8 +121,45 @@ MmapFile::~MmapFile()
     }
 }
 
+size_t copyBuffer(void *dest, size_t destSize, const void *src, size_t srcSize)
+{
+    const size_t sizeToCopy = std::min(destSize - 1, srcSize);
+    std::memcpy(dest, src, sizeToCopy);
+    reinterpret_cast<char *>(dest)[sizeToCopy] = '\0';
+    return sizeToCopy;
+}
+
+size_t readFile(const char *filename, char *buffer, size_t bufferSize)
+{
+    const FileUnix fd{open(filename, O_RDONLY, 0)};
+    if (fd.fd < 0)
+    {
+        throw std::runtime_error{getErrorMessage("Could not open file", filename)};
+    }
+
+    const auto size = read(fd.fd, buffer, bufferSize - 1);
+    if (size > 0)
+    {
+        buffer[size] = '\0';
+        return size;
+    }
+    return 0;
+}
+
 std::string readFile(const char *filename)
 {
-    const MmapFile mmapped{filename};
-    return {reinterpret_cast<const char *>(mmapped.content), mmapped.size};
+    const auto [fd, size] = openFileWithSize(filename);
+    if (fd.fd < 0)
+    {
+        throw std::runtime_error{getErrorMessage("Could not open file", filename)};
+    }
+
+    std::string result(size, '\0');
+    const ssize_t readSize = read(fd.fd, result.data(), size);
+    const size_t resizeLen = std::max<ssize_t>(readSize, 0);
+    if (resizeLen < size)
+    {
+        result.resize(readSize);
+    }
+    return result;
 }

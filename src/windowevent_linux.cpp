@@ -179,7 +179,8 @@ bool processEvent(EventInfo &info, struct input_event event)
         }
         break;
     case EV_KEY:
-        if (event.code == info.btn && event.value == 1)
+        // XXX correctly handle EV_SYN
+        if (event.code == info.btn && event.value == 0)
         {
             return true;
         }

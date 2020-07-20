@@ -59,7 +59,7 @@ public:
      */
     void resetSensors();
     SensorFactory &getSensorFactory();
-    Sensor *getThermalSensor();
+    Sensor *getTemperatureSensor();
 
     // handle asynchronous events
     void handleClick(float x, float y);

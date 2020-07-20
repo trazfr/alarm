@@ -3,7 +3,6 @@
 #include "toolbox_filesystem.hpp"
 #include "toolbox_io.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
@@ -14,26 +13,6 @@ namespace
 
 using Buffer_t = std::array<char, 65>;
 
-size_t readFile(const char *filename, Buffer_t &buffer)
-{
-    const FILEUnique file{std::fopen(filename, "rb")};
-    if (file)
-    {
-        // omit the last byte when reading, so we can safely use buffer[size]
-        if (size_t size = std::fread(buffer.data(), 1, buffer.size() - 1, file.get()))
-        {
-            buffer[size] = '\0';
-            if (const char *end = std::strchr(buffer.data(), '\n'))
-            {
-                size = end - buffer.data();
-                buffer[size] = '\0';
-            }
-            return size;
-        }
-    }
-    return 0;
-}
-
 } // namespace
 
 struct SensorThermal::Impl
@@ -41,23 +20,32 @@ struct SensorThermal::Impl
     std::mt19937 rand{};
     Clock::time_point nextRefresh = Clock::time_point::min();
     float value = 0;
-    Buffer_t type;
-    Buffer_t temperaturePath;
+    Buffer_t type{};
+    Buffer_t temperaturePath{};
 };
 
 SensorThermal::SensorThermal(std::string_view path)
     : pimpl{std::make_unique<Impl>()}
 {
     const fs::path fsPath{path};
-    const fs::path fileType = fsPath / "type";
-    const size_t typeSize = readFile(fileType.c_str(), pimpl->type);
-    pimpl->temperaturePath[0] = '\0';
 
-    if (typeSize > 0)
+    const fs::path fileType = fsPath / "type";
+    const fs::path fileTemp = fsPath / "temp";
+
+    if (fs::is_regular_file(fileTemp) && fs::is_regular_file(fileType))
     {
-        const fs::path fileTemp = fsPath / "temp";
-        std::strncpy(pimpl->temperaturePath.data(), fileTemp.c_str(), pimpl->temperaturePath.size());
-        pimpl->temperaturePath.back() = '\0';
+        copyBuffer(pimpl->temperaturePath, fileTemp.native());
+
+        Buffer_t buf;
+        const auto tempSize = readFile(fileTemp.c_str(), buf.data(), buf.size());
+        if (tempSize > 0)
+        {
+            readFile(fileType.c_str(), pimpl->type.data(), pimpl->type.size());
+            if (char *lf = std::strchr(pimpl->type.data(), '\n'))
+            {
+                *lf = '\0';
+            }
+        }
     }
 }
 
@@ -67,20 +55,21 @@ std::vector<std::unique_ptr<Sensor>> SensorThermal::create()
 {
     std::vector<std::unique_ptr<Sensor>> sensors;
     const fs::path thermal = "/sys/class/thermal";
-    for (auto &dirEntry : fs::directory_iterator{thermal})
+    if (fs::is_directory(thermal))
     {
-        if (fs::is_directory(dirEntry) && std::strstr(dirEntry.path().c_str(), "thermal_zone"))
+        for (auto &dirEntry : fs::directory_iterator{thermal})
         {
-            auto sensor = std::make_unique<SensorThermal>(dirEntry.path().native());
-            if (const auto name = sensor->getName();
-                name && name[0] && sensor->refresh(Clock::time_point::min()))
+            if (fs::is_directory(dirEntry) && std::strstr(dirEntry.path().c_str(), "thermal_zone") != nullptr)
             {
-                sensors.push_back(std::move(sensor));
+                auto sensor = std::make_unique<SensorThermal>(dirEntry.path().native());
+                if (const auto name = sensor->getName();
+                    name && name[0] && sensor->refresh(Clock::time_point::min()))
+                {
+                    sensors.push_back(std::move(sensor));
+                }
             }
         }
     }
-    std::sort(sensors.begin(), sensors.end(),
-              [](const auto &first, const auto &second) { return first->getName() < second->getName(); });
 
     return sensors;
 }
@@ -90,7 +79,7 @@ bool SensorThermal::refresh(const Clock::time_point &time)
     if (time >= pimpl->nextRefresh)
     {
         Buffer_t value;
-        if (readFile(pimpl->temperaturePath.data(), value) > 0)
+        if (readFile(pimpl->temperaturePath.data(), value.data(), value.size()))
         {
             char *end = nullptr;
             const long intValue = std::strtol(value.data(), &end, 10);

@@ -13,27 +13,33 @@ class SensorFactory
 public:
     struct Impl;
 
+    enum class Type
+    {
+        Temperature,
+        Humidity,
+    };
+
     SensorFactory();
     ~SensorFactory();
 
     /**
-     * Number of /sys/class/thermal sensors
+     * Get the number of sensors for the given type
      * 
-     * The valid sensorNumber values are from 0 to getThermalSize()
+     * The valid sensorNumber values are from 0 to getSize(Type)
      */
-    size_t getThermalSize() const;
+    size_t getSize(Type type) const;
 
     /**
-     * /sys/class/thermal sensor instance which can be refreshed
+     * Get the sensor instance which can be refreshed
      * 
-     * @return a valid Sensor if sensorNumber < getThermalSize(), otherwise nullptr
+     * @return a valid Sensor if sensorNumber < getSize(Type), otherwise nullptr
      */
-    Sensor *getThermal(size_t sensorNumber);
+    Sensor *get(Type type, size_t sensorNumber);
 
     /**
-     * /sys/class/thermal sensor where we can only get the cached data
+     * Temperature sensor where we can only get the cached data
      */
-    const Sensor *getThermal(size_t sensorNumber) const;
+    const Sensor *get(Type type, size_t sensorNumber) const;
 
     friend std::ostream &operator<<(std::ostream &str, const SensorFactory &factory)
     {
