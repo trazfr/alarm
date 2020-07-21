@@ -31,7 +31,8 @@ namespace
 
 using FramebufferFilename_t = std::array<char, sizeof("/dev/fb99")>;
 constexpr size_t kFramebufferBitsPerPixel = 16;
-constexpr size_t kPixelSize = 3;
+constexpr GLenum kGlFormat = GL_RGB;
+constexpr size_t kPixelSize = kGlFormat == GL_RGB ? 3 : 4;
 
 // not very accurate... but should be OK for Raspberry (either /dev/fb1 if HDMI is plugged in or /dev/fb0)
 FramebufferFilename_t getLastFb()
@@ -191,7 +192,7 @@ WindowRaspberryPiFramebuffer::WindowRaspberryPiFramebuffer(int width, int height
     {
         throw EGLError{"eglMakeCurrent() failed"};
     }
-    pimpl->frame.resize(pimpl->width * pimpl->height * kPixelSize + 1);
+    pimpl->frame.resize(pimpl->width * pimpl->height * kPixelSize);
 }
 
 WindowRaspberryPiFramebuffer::~WindowRaspberryPiFramebuffer() = default;
@@ -205,12 +206,12 @@ void WindowRaspberryPiFramebuffer::end()
     // ~1.3ms in RGB
     glFinish();
     // ~2.5ms in RGB
-    glReadPixels(0, 0, pimpl->width, pimpl->height, GL_RGB, GL_UNSIGNED_BYTE, pimpl->frame.data());
+    glReadPixels(0, 0, pimpl->width, pimpl->height, kGlFormat, GL_UNSIGNED_BYTE, pimpl->frame.data());
 
     const auto inputLineLen = pimpl->width * kPixelSize;
     const auto begin = reinterpret_cast<const uint8_t *>(pimpl->frame.data());
     auto inputLineEnd = reinterpret_cast<uint8_t *>(pimpl->frame.data() + inputLineLen * pimpl->height);
-    auto output = reinterpret_cast<uint16_t *>(pimpl->mmaped.content);
+    auto output = reinterpret_cast<uint32_t *>(pimpl->mmaped.content);
 
     // convert RBG888 -> RGB565 + flip vertical
     // ~5.5ms in RGB
@@ -221,13 +222,12 @@ void WindowRaspberryPiFramebuffer::end()
 
         while (inputPixel < inputLineEnd)
         {
-            const uint32_t r = inputPixel[0];
-            const uint32_t g = inputPixel[1];
-            const uint32_t b = inputPixel[2];
+            const uint32_t r = inputPixel[0] << 16 | inputPixel[kPixelSize];
+            const uint32_t g = inputPixel[1] << 16 | inputPixel[kPixelSize + 1];
+            const uint32_t b = inputPixel[2] << 16 | inputPixel[kPixelSize + 2];
+            *output = htobe32((r & 0x00f800f8) << 8 | ((g & 0x00fc00fc) << 3) | ((b & 0x00f800f8) >> 3));
 
-            *output = htobe16(((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | ((b >> 3) & 0x001f));
-
-            inputPixel += kPixelSize;
+            inputPixel += kPixelSize * 2;
             ++output;
         }
         inputLineEnd = dataBegin;

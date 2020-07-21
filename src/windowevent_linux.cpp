@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <array>
+#include <cstdlib>
 #include <iostream>
 
 struct WindowEventLinux::Impl
@@ -16,11 +17,15 @@ struct WindowEventLinux::Impl
     {
         using EventFilename_t = std::array<char, sizeof("/dev/input/event99")>;
         using EventName_t = std::array<char, 128>;
+        using EventList_t = std::array<struct input_event, 8>;
 
         FileUnix fd;
 
-        EventFilename_t filename;
-        EventName_t name;
+        EventFilename_t filename{};
+        EventName_t name{};
+        EventList_t events{};
+        EventList_t::const_iterator eventsRead = events.begin();
+        EventList_t::const_iterator eventsEndRead = events.begin();
 
         uint16_t btn = 0;
         int32_t x = 0;
@@ -37,6 +42,13 @@ struct WindowEventLinux::Impl
 
 namespace
 {
+enum class EventReceived
+{
+    Misc,
+    Click,
+    EndFrame,
+};
+
 constexpr char kEvent[] = "/dev/input/event%d";
 using EventInfo = WindowEventLinux::Impl::EventInfo;
 
@@ -52,8 +64,8 @@ constexpr size_t getNumIntegers(unsigned int max)
     return (max + (getBitSize<T>() - 1)) / getBitSize<T>();
 }
 
-template <typename T>
-bool getBit(const T *c, unsigned int bitNum)
+template <typename T, size_t S>
+bool getBit(const T (&c)[S], unsigned int bitNum)
 {
     return (c[bitNum / getBitSize<T>()] >> (bitNum % getBitSize<T>())) & 0x01;
 }
@@ -90,7 +102,7 @@ uint16_t getEvKey(int fd)
         return 0;
     }
 
-    // we need either BTN_LEFT or BTN_TOUCH
+    // we need either BTN_LEFT or BTN_TOUCH (prefer BTN_LEFT when available)
     for (const unsigned int btn : {BTN_LEFT, BTN_TOUCH})
     {
         if (getBit(bitsKey, btn))
@@ -112,7 +124,7 @@ std::tuple<int32_t, int32_t, int32_t> getEvAbsBoundaries(int fd, int abs)
     return {absinfo.value, absinfo.minimum, absinfo.maximum};
 }
 
-int openFile(const char *filename)
+int openFileNonBlocking(const char *filename)
 {
     const int fd = open(filename, O_RDONLY | O_NONBLOCK, 0);
     if (fd < 0)
@@ -133,7 +145,7 @@ EventInfo findEvent()
             throw std::runtime_error{"Reached the limit"};
         }
 
-        FileUnix fd{openFile(result.filename.data())};
+        FileUnix fd{openFileNonBlocking(result.filename.data())};
         if (ioctl(fd.fd, EVIOCGNAME(result.name.size() - 1), result.name.data()) < 0)
         {
             continue;
@@ -159,15 +171,44 @@ EventInfo findEvent()
     return result;
 }
 
+void readEvents(EventInfo &info)
+{
+    if (info.eventsRead == info.eventsEndRead)
+    {
+        const auto readBytes = read(info.fd.fd, info.events.data(), sizeof(info.events));
+        const auto div = std::div(readBytes, sizeof(info.events[0]));
+
+        if ((readBytes < 0 && errno != EAGAIN) || (readBytes > 0 && div.rem != 0))
+        {
+            std::cerr << "Error while reading from " << info.filename.data() << std::endl;
+            info = findEvent();
+        }
+        info.eventsRead = info.events.begin();
+        info.eventsEndRead = info.events.begin() + div.quot;
+    }
+}
+
 float getPosition(int32_t val, int32_t valMin, int32_t valMax)
 {
     return static_cast<double>(val - valMin) / (valMax - valMin);
 }
 
-bool processEvent(EventInfo &info, struct input_event event)
+EventReceived processEvent(EventInfo &info, const struct input_event &event)
 {
     switch (event.type)
     {
+    case EV_SYN:
+        if (event.code == SYN_REPORT)
+        {
+            return EventReceived::EndFrame;
+        }
+        break;
+    case EV_KEY:
+        if (event.code == info.btn && event.value == 1)
+        {
+            return EventReceived::Click;
+        }
+        break;
     case EV_ABS:
         if (event.code == ABS_X)
         {
@@ -178,17 +219,10 @@ bool processEvent(EventInfo &info, struct input_event event)
             info.y = event.value;
         }
         break;
-    case EV_KEY:
-        // XXX correctly handle EV_SYN
-        if (event.code == info.btn && event.value == 0)
-        {
-            return true;
-        }
-        break;
     default:
         break;
     }
-    return false;
+    return EventReceived::Misc;
 }
 
 } // namespace
@@ -207,27 +241,25 @@ WindowEventLinux::~WindowEventLinux() = default;
 
 std::optional<Event> WindowEventLinux::popEvent()
 {
-    for (bool loop = true; loop;)
+    bool clickReceived = false;
+    for (;;)
     {
-        struct input_event event;
-        const auto readBytes = read(pimpl->info.fd.fd, &event, sizeof(event));
+        readEvents(pimpl->info);
 
-        if (readBytes == sizeof(event))
+        if (pimpl->info.eventsRead == pimpl->info.eventsEndRead)
         {
-            if (processEvent(pimpl->info, event))
-            {
-                return Event::createClick(getPosition(pimpl->info.x, pimpl->info.xMin, pimpl->info.xMax),
-                                          getPosition(pimpl->info.y, pimpl->info.yMin, pimpl->info.yMax));
-            }
+            break;
         }
-        else if (readBytes == 0 || (readBytes < 0 && errno == EAGAIN))
+
+        const auto result = processEvent(pimpl->info, *pimpl->info.eventsRead);
+        ++pimpl->info.eventsRead;
+
+        clickReceived |= result == EventReceived::Click;
+
+        if (result == EventReceived::EndFrame && clickReceived)
         {
-            loop = false;
-        }
-        else
-        {
-            std::cerr << "Error while reading from " << pimpl->info.filename.data() << std::endl;
-            pimpl->info = findEvent();
+            return Event::createClick(getPosition(pimpl->info.x, pimpl->info.xMin, pimpl->info.xMax),
+                                      getPosition(pimpl->info.y, pimpl->info.yMin, pimpl->info.yMax));
         }
     }
     return {};

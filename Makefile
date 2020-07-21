@@ -34,11 +34,11 @@ ASSETS_COMP		:= $(patsubst %.svg,$(BUILD_BASE)/%.dds,$(SVG_ASSETS)) \
 				   $(addprefix $(BUILD_BASE)/,$(SHADER_ASSETS)) \
 				   $(patsubst %.po,$(BUILD_BASE)/%/LC_MESSAGES/alarm.mo,$(MESSAGES_ASSETS))
 
-CPPFLAGS		:= -save-temps=obj \
+CPPFLAGS		:= -pipe -ffunction-sections \
 					-std=c++17 -Wall -Wextra -pedantic -Werror \
 					$(shell pkg-config alsa --cflags) \
 					$(INCLUDE_MODULES)
-LDFLAGS			:= -save-temps=obj \
+LDFLAGS			:= -pipe -Wl,--gc-sections \
 					$(shell pkg-config alsa --libs) \
 					-lstdc++fs
 GCOV_CPPFLAGS	= -fprofile-arcs -ftest-coverage
@@ -212,7 +212,7 @@ $(BUILD_BASE)/%.vert: %.vert
 	$(Q) cp $< $@
 
 define compile-objects
-$1/%.o: %.cpp
+$1/%.o: %.cpp Makefile
 	$(vecho) "CXX $$<"
 	$(Q) $(CXX) $(CPPFLAGS) -c -o $$@ $$<
 endef
