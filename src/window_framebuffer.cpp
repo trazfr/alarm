@@ -1,13 +1,13 @@
 #include "window_framebuffer.hpp"
 
-#ifndef NO_WINDOW_FRAMEBUFFER
+#ifdef USE_WINDOW_FRAMEBUFFER
 
 // Mesa drivers don't like eglCreatePbufferSurface() + glReadPixels()
 
 // on rpi, it silently includes bcm headers
-#ifndef NO_WINDOW_RASPBERRYPI
+#ifdef USE_WINDOW_DISPMANX
 #define VCOS_LOGGING_H
-#endif // NO_WINDOW_RASPBERRYPI
+#endif // USE_WINDOW_DISPMANX
 
 #include "windowevent_linux.hpp"
 
@@ -336,4 +336,4 @@ std::ostream &WindowFramebuffer::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // NO_WINDOW_FRAMEBUFFER
+#endif // USE_WINDOW_FRAMEBUFFER

@@ -85,8 +85,8 @@ endif
 # install on Raspberry PI (no choice here as there are incompatibilities with GLESv2 / EGL)
 ifneq ("$(wildcard /opt/vc/include/bcm_host.h)","")
 
-	CPPFLAGS	+= -DNO_WINDOW_WAYLAND \
-					-DNO_WINDOW_SDL \
+	CPPFLAGS	+= -DUSE_WINDOW_DISPMANX \
+					-DUSE_WINDOW_FRAMEBUFFER \
 					-I/opt/vc/include
 	LDFLAGS		+= -L/opt/vc/lib \
 				   -lbcm_host \
@@ -96,25 +96,19 @@ ifneq ("$(wildcard /opt/vc/include/bcm_host.h)","")
 # others: egl, wayland or sdl2
 else
 
-CPPFLAGS		+= $(shell pkg-config glesv2 --cflags) -DNO_WINDOW_RASPBERRYPI
+CPPFLAGS		+= $(shell pkg-config glesv2 --cflags)
 LDFLAGS			+= $(shell pkg-config glesv2 --libs)
 ifeq ("$(USE_FRAMEBUFFER)","1")
-	CPPFLAGS	+= $(shell pkg-config egl --cflags)
+	CPPFLAGS	+= $(shell pkg-config egl --cflags) -DUSE_WINDOW_FRAMEBUFFER
 	LDFLAGS		+= $(shell pkg-config egl --libs)
-else
-	CPPFLAGS	+= -DNO_WINDOW_FRAMEBUFFER
 endif
 ifeq ("$(USE_WAYLAND)","1")
-	CPPFLAGS	+= $(shell pkg-config wayland-egl --cflags)
+	CPPFLAGS	+= $(shell pkg-config wayland-egl --cflags) -DUSE_WINDOW_WAYLAND
 	LDFLAGS		+= $(shell pkg-config wayland-egl --libs)
-else
-	CPPFLAGS	+= -DNO_WINDOW_WAYLAND
 endif
 ifeq ("$(USE_SDL)","1")
-	CPPFLAGS	+= $(shell sdl2-config --cflags)
+	CPPFLAGS	+= $(shell sdl2-config --cflags) -DUSE_WINDOW_SDL
 	LDFLAGS			+= $(shell sdl2-config --libs)
-else
-	CPPFLAGS	+= -DNO_WINDOW_SDL
 endif
 
 endif

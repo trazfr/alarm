@@ -38,14 +38,16 @@ using DriverData = std::tuple<const char *, std::unique_ptr<Window> (*)(int, int
  * Stores all the compiled drivers. The 1st is the default
  */
 constexpr DriverData kDrivers[] = {
+#ifdef USE_WINDOW_FRAMEBUFFER
     {"framebuffer", &createWindow<WindowFramebuffer>},
-#ifndef NO_WINDOW_RASPBERRYPI
+#endif
+#ifdef USE_WINDOW_DISPMANX
     {"raspberrypi_dispmanx", &createWindow<WindowRaspberryPiDispmanx>},
 #endif
-#ifndef NO_WINDOW_SDL
+#ifdef USE_WINDOW_SDL
     {"sdl", &createWindow<WindowSDL>},
 #endif
-#ifndef NO_WINDOW_WAYLAND
+#ifdef USE_WINDOW_WAYLAND
     {"wayland", &createWindow<WindowWayland>},
 #endif
 };

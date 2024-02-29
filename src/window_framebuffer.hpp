@@ -2,7 +2,7 @@
 
 #include "window.hpp"
 
-#ifndef NO_WINDOW_FRAMEBUFFER
+#ifdef USE_WINDOW_FRAMEBUFFER
 
 #include <memory>
 
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // NO_WINDOW_FRAMEBUFFER
+#endif // USE_WINDOW_FRAMEBUFFER

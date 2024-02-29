@@ -2,7 +2,7 @@
 
 #include "window.hpp"
 
-#ifndef NO_WINDOW_RASPBERRYPI
+#ifdef USE_WINDOW_DISPMANX
 
 #include <memory>
 
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // NO_WINDOW_RASPBERRYPI
+#endif // USE_WINDOW_DISPMANX

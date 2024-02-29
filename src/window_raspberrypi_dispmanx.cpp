@@ -1,6 +1,6 @@
 #include "window_raspberrypi_dispmanx.hpp"
 
-#ifndef NO_WINDOW_RASPBERRYPI
+#ifdef USE_WINDOW_DISPMANX
 
 #include "windowevent_linux.hpp"
 
@@ -210,4 +210,4 @@ std::ostream &WindowRaspberryPiDispmanx::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // NO_WINDOW_RASPBERRYPI
+#endif // USE_WINDOW_DISPMANX

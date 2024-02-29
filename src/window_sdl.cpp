@@ -1,6 +1,6 @@
 #include "window_sdl.hpp"
 
-#ifndef NO_WINDOW_SDL
+#ifdef USE_WINDOW_SDL
 
 #include "error.hpp"
 #include "event.hpp"
@@ -247,4 +247,4 @@ std::ostream &WindowSDL::toStream(std::ostream &str) const
     return str;
 }
 
-#endif // NO_WINDOW_SDL
+#endif // USE_WINDOW_SDL
