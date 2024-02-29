@@ -7,7 +7,7 @@
 #include "error.hpp"
 #include "toolbox_io.hpp"
 
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 
 #include <cstring>
 #include <iostream>
@@ -103,7 +103,7 @@ public:
 
 /**
  * Functor to delete the ALSA handler
- * 
+ *
  * @sa AlsaUnique
  */
 struct AlsaDeleter

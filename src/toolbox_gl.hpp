@@ -2,7 +2,7 @@
 
 /**
  * @file
- * 
+ *
  * This file is the only file to include the OpenGL headers (GLES2 due to Raspberry PI)
  * It also provides a function to check OpenGL errors
  */

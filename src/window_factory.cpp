@@ -172,7 +172,7 @@ std::ostream &WindowFactory::toStream(std::ostream &str) const
         str << "\n - " << getDriver(index);
     }
     str << "\nEvent Drivers:";
-    for (const auto event : kEventDrivers)
+    for (const auto &event : kEventDrivers)
     {
         str << "\n - " << std::get<0>(event);
     }

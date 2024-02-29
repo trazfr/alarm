@@ -12,6 +12,8 @@
 #include "toolbox_time.hpp"
 
 #include <array>
+#include <cmath>
+#include <cstdio>
 #include <cstring>
 
 namespace

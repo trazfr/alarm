@@ -13,6 +13,7 @@
 #include "toolbox_io.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <ostream>

@@ -8,7 +8,7 @@
 
 /**
  * @brief sensor for path /sys/class/thermal in Linux (Thermal)
- * 
+ *
  * @arg refresh rate is random between 2min and 3min
  * @arg the unit is Celcius degree
  */

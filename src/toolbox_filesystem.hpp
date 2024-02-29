@@ -2,10 +2,10 @@
 
 /**
  * @file
- * 
+ *
  * This file is to provide the compatibility with GCC6 (Ubuntu 18.04) regarding the filesystem.
  * This is the only file to include <filesystem> due to a missing header
- * 
+ *
  * The namespace "fs" is either std::filesystem or std::experimental::filesystem
  */
 

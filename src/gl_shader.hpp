@@ -15,7 +15,7 @@ std::ostream &operator<<(std::ostream &str, GlShaderType type);
 
 /**
  * @brief Base class to store shader
- * 
+ *
  * The shader remains valid till the destruction of the object.
  * No copy is allowed as we are keeping a reference to the shader on the OpenGL side
  */
@@ -71,7 +71,7 @@ public:
 
 /**
  * @brief Store a shader Program (vertex + fragment shaders linked)
- * 
+ *
  * As it is a link to OpenGL resource, there is no copy, only move
  */
 class GlProgram

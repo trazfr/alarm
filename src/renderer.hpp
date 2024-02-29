@@ -49,21 +49,21 @@ public:
 
     /**
      * Method to be called before any drawing on screen
-     * 
+     *
      * Clears the OpenGL buffer
      */
     void begin();
 
     /**
      * Method to be called after all drawing on screen
-     * 
+     *
      * Check for OpenGL errors
      */
     void end();
 
     /**
      * Render a sprite at a given position
-     * 
+     *
      * @param asset sprite to be rendered
      * @param x X position
      * @param y Y position

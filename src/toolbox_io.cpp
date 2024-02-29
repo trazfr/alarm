@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <stdexcept>
 
 namespace
 {

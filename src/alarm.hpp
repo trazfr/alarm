@@ -31,7 +31,7 @@ public:
 
     /**
      * Clear the internal state so that the next call to run() will reinitialize the state
-     * 
+     *
      * This has to be run each time the configuration is updated
      */
     void reset();
@@ -39,7 +39,7 @@ public:
     /**
      * Method to be run at each loop to ensure the audio buffers are filled and the alarm is started/stopped according
      * to the configuration.
-     * 
+     *
      * This is done by the Context under normal operation
      */
     void run(const Clock::time_point &time);

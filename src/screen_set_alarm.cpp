@@ -9,6 +9,9 @@
 #include "renderer_text.hpp"
 #include "toolbox_i18n.hpp"
 
+#include <array>
+#include <cstdio>
+
 struct ScreenSetAlarm::Impl
 {
     enum class Selected

@@ -2,7 +2,7 @@
 
 /**
  * @brief Simple position
- * 
+ *
  * It is used in 2 cases:
  * @arg to detect clicks on screen
  * @arg to align the sprites

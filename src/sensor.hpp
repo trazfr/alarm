@@ -13,7 +13,7 @@ public:
     /**
      * Refresh the sensor value. Due the physical constraints, the sensor may cache its value and refresh only from time
      * to time
-     * 
+     *
      * @return false in case of error
      */
     virtual bool refresh(const Clock::time_point &time) = 0;

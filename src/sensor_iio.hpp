@@ -8,7 +8,7 @@
 
 /**
  * @brief sensor for path /sys/bus/iio/devices in Linux (Industrial IO)
- * 
+ *
  * @arg refresh rate is random between 2min and 3min
  * @arg the unit is Celcius degree (temperature) or percent (relative humidity)
  */

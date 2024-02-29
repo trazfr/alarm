@@ -6,7 +6,7 @@ class Config;
 
 /**
  * @brief Render the analog clock's hands
- * 
+ *
  * The second hand is only displayed if enabled in the config
  */
 class RendererClock
@@ -16,7 +16,7 @@ public:
 
     /**
      * Constructor
-     * 
+     *
      * @param screenWidth used for the heigth / width ratio to have a round clock
      * @param screenHeight used for the heigth / width ratio to have a round clock
      * @param x position on screen of the center of the clock

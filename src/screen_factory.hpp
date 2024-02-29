@@ -17,7 +17,7 @@ enum class ScreenType
 
 /**
  * @brief Factory for Screen. All screens are pre-allocated at startup
- * 
+ *
  * @sa Screen
  */
 class ScreenFactory

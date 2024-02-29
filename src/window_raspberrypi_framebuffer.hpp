@@ -8,7 +8,7 @@
 
 /**
  * @brief Window to output to the TFT SPI port
- * 
+ *
  * Raspberry PI only
  */
 class WindowRaspberryPiFramebuffer : public Window

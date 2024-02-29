@@ -6,7 +6,7 @@
 
 /**
  * @brief Get events from /dev/input/event*
- * 
+ *
  * It uses either a touchscreen or a touchpad with absolute position
  */
 class WindowEventLinux : public WindowEvent

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * 
+ *
  * This file is to provide some general tools related to input-output
  */
 
@@ -22,7 +22,7 @@ struct CloseFile
 };
 /**
  * std::unique_ptr<> to close a C-like FILE at destruction time
- * 
+ *
  * @sa CloseFile
  */
 using FILEUnique = std::unique_ptr<FILE, CloseFile>;
@@ -89,7 +89,7 @@ inline size_t copyBuffer(std::array<T, S> &dest, std::string_view src)
 /**
  * Read max bufferSize-1 from the filename.
  * The resulting string is always null-terminated
- * 
+ *
  * @return the number of bytes (not counting the last '\0')
  */
 size_t readFile(const char *filename, char *buffer, size_t bufferSize);

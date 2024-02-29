@@ -9,9 +9,9 @@ class GlVboElementArray;
 
 /**
  * @brief Sprite to be displayed
- * 
+ *
  * created from Renderer
- * 
+ *
  * @sa Renderer
  */
 class RendererSprite

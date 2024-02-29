@@ -65,7 +65,7 @@ On Debian or Raspbian (Raspberry PI):
 
 ```bash
 # build main program
-$ apt install build-essential rapidjson-dev libasound2-dev libmodplug-dev libmpg123-dev libvorbis-dev
+$ apt install build-essential rapidjson-dev libasound2-dev libgles-dev libmodplug-dev libmpg123-dev libvorbis-dev
 
 # build assets
 $ apt install imagemagick inkscape gettext

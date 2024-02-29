@@ -83,11 +83,11 @@ bool setDate(const Clock::time_point &time, Select select, int offset)
         break;
     }
 
-    const time_t fixedTime = mktime(&utc);
+    const timespec fixedTime{mktime(&utc), 0};
 
-    if (stime(&fixedTime))
+    if (clock_settime(CLOCK_REALTIME, &fixedTime))
     {
-        std::cerr << "Cannot set time to " << fixedTime << std::endl;
+        std::cerr << "Cannot set time to " << fixedTime.tv_sec << std::endl;
         return false;
     }
     return true;

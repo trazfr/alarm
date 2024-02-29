@@ -9,7 +9,7 @@
 
 /**
  * @brief Read MOD audio files
- * 
+ *
  * It also support other tracker types (it, xm, s3m...)
  */
 class AudioReadMod : public AudioRead
@@ -31,9 +31,9 @@ public:
 
     /**
      * Create a AudioReadMod object if the file is of right format
-     * 
+     *
      * In case of success, takes the ownership of file
-     * 
+     *
      * @return a valid unique_ptr in case of success, nullptr otherwise (this is not a MOD file for instance)
      */
     static std::unique_ptr<AudioRead> create(FILEUnique &file, const char *extension);

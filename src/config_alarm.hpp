@@ -3,12 +3,13 @@
 #include "serializable.hpp"
 
 #include <memory>
+#include <string_view>
 
 /**
  * @brief Holds the configuration for an alarm
- * 
+ *
  * An alarm is:
- * 
+ *
  * @arg 1 audio file (mod, mp3, ogg...)
  * @arg flag active / inactive
  * @arg a time of day (hour, minute)
@@ -21,7 +22,7 @@ public:
 
     /**
      * Create an alarm with default values:
-     * 
+     *
      * @arg no audio file
      * @arg inactive
      * @arg stars at midnight

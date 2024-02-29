@@ -3,6 +3,7 @@
 #include "serializer.hpp"
 
 #include <chrono>
+#include <string>
 
 namespace
 {

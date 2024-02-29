@@ -9,7 +9,7 @@
 
 /**
  * @brief Read Ogg Vorbis audio files
- * 
+ *
  * @attention this does not support VBR, it is only for basic audio
  */
 class AudioReadOgg : public AudioRead
@@ -29,9 +29,9 @@ public:
 
     /**
      * Create a AudioReadOgg object if the file is of right format
-     * 
+     *
      * In case of success, takes the ownership of file
-     * 
+     *
      * @return a valid unique_ptr in case of success, nullptr otherwise (this is not an OGG/Vorbis file for instance)
      */
     static std::unique_ptr<AudioRead> create(FILEUnique &file, const char *extension);

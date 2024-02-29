@@ -6,9 +6,9 @@
 
 /**
  * @brief Change the date of the computer (alarm clock intended to run without network)
- * 
+ *
  * This needs CAP_SYS_TIME privilege
- * 
+ *
  * @sa man 2 stime
  */
 class ScreenSetDate : public Screen

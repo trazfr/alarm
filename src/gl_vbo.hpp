@@ -24,7 +24,7 @@ protected:
 
     /**
      * Return the OpenGL type associated to T.
-     * 
+     *
      * @arg GLubyte: GL_UNSIGNED_BYTE
      * @arg GLushort: GL_UNSIGNED_SHORT
      * @arg GLfloat: GL_FLOAT
@@ -63,9 +63,9 @@ public:
 
     /**
      * Draw the VBO.
-     * 
+     *
      * Most of the time the template variant is a better choice.
-     * 
+     *
      * @param offset in bytes
      * @param stride in bytes
      */
@@ -73,7 +73,7 @@ public:
 
     /**
      * Draw the VBO.
-     * 
+     *
      * No offset, there is no "hole", all the data is contiguous in the VBO (stride = 0).
      */
     void draw(int index, int size)
@@ -83,12 +83,12 @@ public:
 
     /**
      * Draw the VBO
-     * 
+     *
      * This variant is used when the data type is the same in the VBO.
      * For instance when all the VBO is filled with GLfloat.
-     * 
+     *
      * The offset and stride is then computed thanks to the size of 1 element
-     * 
+     *
      * @param offset in number of elements
      * @param stride in number of elements
      */

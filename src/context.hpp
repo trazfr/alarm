@@ -66,7 +66,7 @@ public:
 
     /**
      * To be called at each loop. It takes care in to call the run() method on all subsystems
-     * 
+     *
      * @arg Alarm to refresh the alarm
      * @arg Screen to refresh the display
      * @arg refresh the active Sensor if any

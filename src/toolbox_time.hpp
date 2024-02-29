@@ -2,7 +2,7 @@
 
 /**
  * @file
- * 
+ *
  * This file is to provide a fixed clock type for the whole program and some helpers
  */
 

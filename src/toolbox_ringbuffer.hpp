@@ -5,9 +5,9 @@
 
 /**
  * @brief basic ring buffer implementation
- * 
+ *
  * This is a fixed-size FIFO container
- * 
+ *
  * The memory consumption is sizeof(T) * (Capacity + 1) + 2 * sizeof(void*) + alignment
  */
 template <typename T, size_t Capacity>
@@ -40,7 +40,7 @@ public:
 
     /**
      * Push an element into the ring buffer.
-     * 
+     *
      * @return true if the push has succeeded
      */
     bool push(T t)
@@ -56,7 +56,7 @@ public:
 
     /**
      * Fetch an element from the ring buffer
-     * 
+     *
      * @return a valid optional in case of success
      */
     std::optional<T> pop()

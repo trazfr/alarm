@@ -22,7 +22,7 @@ public:
 
     /**
      * Get the internalFormat/format to be used in:
-     * 
+     *
      * @arg glCompressedTexImage2D()
      * @arg glTexImage2D()
      */
@@ -30,7 +30,7 @@ public:
 
     /**
      * Get the type to be used in:
-     * 
+     *
      * @arg glTexImage2D()
      */
     unsigned int getGlType() const;

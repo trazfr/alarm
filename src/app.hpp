@@ -18,7 +18,7 @@ public:
 
     /**
      * Runs the application
-     * 
+     *
      * This method only returns at exit time
      */
     void run();

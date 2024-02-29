@@ -7,7 +7,7 @@ class Context;
 
 /**
  * Convert a position (posX = 0..1, posY = 0..1) to the corresponding enum
- * 
+ *
  * @arg posX=0 is left
  * @arg posX=1 is right
  * @arg posY=0 is up

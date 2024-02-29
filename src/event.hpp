@@ -19,7 +19,7 @@ struct EventClick
 
 /**
  * @brief Maps an user event
- * 
+ *
  * for now only click at a given position on screen or close the window on SDL2
  */
 struct Event

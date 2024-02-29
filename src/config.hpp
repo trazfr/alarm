@@ -4,12 +4,13 @@
 
 #include <list>
 #include <memory>
+#include <string_view>
 
 class ConfigAlarm;
 
 /**
  * @brief holds the configuration
- * 
+ *
  * It needs a Deserializer / Serializer save it
  */
 class Config : public Serializable
@@ -19,7 +20,7 @@ public:
 
     /**
      * Create a config with default values
-     * 
+     *
      * @arg alsa_device is default
      * @arg assets_folder is taken from ALARM_ASSETS_DIR ($PWD in debug, /opt/local/alarm/assets in release)
      * @arg display_driver is not defined

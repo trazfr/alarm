@@ -38,14 +38,14 @@ public:
 
     /**
      * Get the number of compiled drivers. To be used with getDriver()
-     * 
+     *
      * @sa getDriver()
      */
     static size_t getDriverSize();
 
     /**
      * Get the driver name corresponding to the index
-     * 
+     *
      * @sa getDriverSize()
      */
     static std::string_view getDriver(size_t index);

@@ -9,9 +9,9 @@ class GlVboElementArray;
 
 /**
  * @brief Text box whose content may change
- * 
+ *
  * created from Renderer
- * 
+ *
  * @sa Renderer
  */
 class RendererText
@@ -43,9 +43,9 @@ private:
 
 /**
  * @brief Unmutable text box
- * 
+ *
  * created from Renderer
- * 
+ *
  * @sa Renderer
  */
 class RendererTextStatic

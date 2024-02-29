@@ -9,6 +9,8 @@
 #include "sensor_factory.hpp"
 #include "toolbox_i18n.hpp"
 
+#include <cmath>
+#include <cstdio>
 #include <cstring>
 
 namespace

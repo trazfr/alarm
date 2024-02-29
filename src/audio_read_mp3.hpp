@@ -9,7 +9,7 @@
 
 /**
  * @brief Read MP3 audio files
- * 
+ *
  * The patent is expired, so it is safe to use it
  */
 class AudioReadMp3 : public AudioRead
@@ -35,9 +35,9 @@ public:
 
     /**
      * Create a AudioReadMp3 object if the file is of right format
-     * 
+     *
      * In case of success, takes the ownership of file
-     * 
+     *
      * @return a valid unique_ptr in case of success, nullptr otherwise (this is not an MP3 for instance)
      */
     static std::unique_ptr<AudioRead> create(FILEUnique &file, const char *extension);

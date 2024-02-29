@@ -29,7 +29,7 @@ public:
 
     /**
      * Fetch an Audio buffer.
-     * 
+     *
      * @return 0 in case of error (this can be EOF with loop=false)
      */
     virtual size_t readBuffer(char *buffer, size_t bufferSize, bool loop) = 0;
