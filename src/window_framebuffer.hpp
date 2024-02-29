@@ -2,22 +2,20 @@
 
 #include "window.hpp"
 
-#ifndef NO_WINDOW_RASPBERRYPI
+#ifndef NO_WINDOW_FRAMEBUFFER
 
 #include <memory>
 
 /**
- * @brief Window to output to the TFT SPI port
- *
- * Raspberry PI only
+ * @brief Window to output to the Linux Framebuffer
  */
-class WindowRaspberryPiFramebuffer : public Window
+class WindowFramebuffer : public Window
 {
 public:
     struct Impl;
 
-    explicit WindowRaspberryPiFramebuffer(int width, int height);
-    ~WindowRaspberryPiFramebuffer() override;
+    explicit WindowFramebuffer(int width, int height);
+    ~WindowFramebuffer() override;
 
     void begin() override;
     void end() override;
@@ -34,4 +32,4 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-#endif // NO_WINDOW_RASPBERRYPI
+#endif // NO_WINDOW_FRAMEBUFFER

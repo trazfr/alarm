@@ -1,7 +1,7 @@
 #include "window_factory.hpp"
 
+#include "window_framebuffer.hpp"
 #include "window_raspberrypi_dispmanx.hpp"
-#include "window_raspberrypi_framebuffer.hpp"
 #include "window_sdl.hpp"
 #include "window_wayland.hpp"
 #include "windowevent_dummy.hpp"
@@ -38,8 +38,8 @@ using DriverData = std::tuple<const char *, std::unique_ptr<Window> (*)(int, int
  * Stores all the compiled drivers. The 1st is the default
  */
 constexpr DriverData kDrivers[] = {
+    {"framebuffer", &createWindow<WindowFramebuffer>},
 #ifndef NO_WINDOW_RASPBERRYPI
-    {"raspberrypi_framebuffer", &createWindow<WindowRaspberryPiFramebuffer>},
     {"raspberrypi_dispmanx", &createWindow<WindowRaspberryPiDispmanx>},
 #endif
 #ifndef NO_WINDOW_SDL

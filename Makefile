@@ -2,6 +2,7 @@ PROGRAM			:= alarm
 UNITTEST		:= $(PROGRAM)_test
 
 INSTALL_FOLDER	?= /opt/local/alarm
+USE_FRAMEBUFFER	?= $(shell pkg-config egl --exists && echo 1)
 USE_WAYLAND		?= $(shell pkg-config wayland-egl --exists && echo 1)
 USE_SDL			?= $(shell pkg-config sdl2 --exists && echo 1)
 USE_LIBMODPLUG	?= $(shell pkg-config libmodplug && echo 1)
@@ -92,14 +93,20 @@ ifneq ("$(wildcard /opt/vc/include/bcm_host.h)","")
 				   -lbrcmEGL \
 				   -lbrcmGLESv2
 
-# others: wayland or sdl2
+# others: egl, wayland or sdl2
 else
 
 CPPFLAGS		+= $(shell pkg-config glesv2 --cflags) -DNO_WINDOW_RASPBERRYPI
 LDFLAGS			+= $(shell pkg-config glesv2 --libs)
+ifeq ("$(USE_FRAMEBUFFER)","1")
+	CPPFLAGS	+= $(shell pkg-config egl --cflags)
+	LDFLAGS		+= $(shell pkg-config egl --libs)
+else
+	CPPFLAGS	+= -DNO_WINDOW_FRAMEBUFFER
+endif
 ifeq ("$(USE_WAYLAND)","1")
-	CPPFLAGS	+= $(shell pkg-config egl wayland-egl --cflags)
-	LDFLAGS		+= $(shell pkg-config egl wayland-egl --libs)
+	CPPFLAGS	+= $(shell pkg-config wayland-egl --cflags)
+	LDFLAGS		+= $(shell pkg-config wayland-egl --libs)
 else
 	CPPFLAGS	+= -DNO_WINDOW_WAYLAND
 endif
