@@ -7,7 +7,7 @@ The goal is to create an alarm clock:
 
 - without the need of network. The time must be set in the interface
 - which outputs to a small screen
-- which keeps the CPU low (hence the C++ and some attention on the performances, where the memory allocation is performed...).  
+- which keeps the CPU low (hence the C++ and some attention on the performances, where the memory allocation is performed...).
   At 25fps, it takes ~2% of CPU on a Raspberry PI 1B.
 
 For this project, I have chosen to use these parts:
@@ -65,7 +65,7 @@ On Debian or Raspbian (Raspberry PI):
 
 ```bash
 # build main program
-$ apt install build-essential rapidjson-dev libasound2-dev libgles-dev libmodplug-dev libmpg123-dev libvorbis-dev
+$ apt install build-essential pkgconf rapidjson-dev libasound2-dev libgles-dev libmodplug-dev libmpg123-dev libvorbis-dev
 
 # build assets
 $ apt install imagemagick inkscape gettext
@@ -229,7 +229,7 @@ The code is organized this way:
 - `src` contains all the C++ source code
 - `test` contains all the C++ unittests
 - `assets/messages` contains files used for internationalization
-- `assets/shader` contains all the shaders 
+- `assets/shader` contains all the shaders
 - `assets/textures` contains the source of the textures (font + svg)
 - `build` is created at `make` time. It contains the object files and assets
 
@@ -288,7 +288,7 @@ The code is very basic. We are just displaying sprites and rotating, no wonderfu
 
 ### assets/textures
 
-The textures are stored as a "source": TTF or SVG.  
+The textures are stored as a "source": TTF or SVG.
 During the compilation, the DDS files are generated on the fly.
 
 ### Internationalization
@@ -311,12 +311,31 @@ $ msgmerge --update assets/messages/fr.po assets/messages/alarm.pot
 
 ## Common errors
 
-### Startup: std::exception: Could not open file
+### Build
+
+If during the build you get:
+
+```
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@assets/alphabet.txt' @ error/property.c/InterpretImageProperties/3708.
+```
+
+You should comment the line `<policy domain="path" rights="none" pattern="@*"/>` in `/etc/ImageMagick-6/policy.xml`.
+
+### Startup: std::exception: Could not open file in /dev
 
 If you get this kind of output at startup:
 
 ```
-...
+std::exception: Could not open /dev/input/event0
+```
+
+Make sure you have the rights to read/write to the file. You may have to add the user to the right group.
+
+### Startup: std::exception: Could not assets
+
+If you get this kind of output at startup:
+
+```
 std::exception: Could not open file /opt/local/alarm/assets/shader/print_texture.vert
 ```
 

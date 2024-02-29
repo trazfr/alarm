@@ -183,13 +183,13 @@ IM_FILTER=-format dds -background none -channel green -fx '0' -channel blue -fx 
 
 $(BUILD_BASE)/assets/textures/clock.dds: assets/textures/clock.svg Makefile
 	$(vecho) "Convert $<"
-	$(Q) inkscape -z $< -e $@.png
+	$(Q) inkscape $< --export-overwrite --export-filename=$@.png
 	$(Q) convert -extent 256x256 $(IM_FILTER) $@.png $@
 	$(Q) rm -f $@.png
 
 $(BUILD_BASE)/assets/textures/arrow.dds: assets/textures/arrow.svg Makefile
 	$(vecho) "Convert $<"
-	$(Q) inkscape -z $< -e $@.png
+	$(Q) inkscape $< --export-overwrite --export-filename=$@.png
 	$(Q) convert -extent 64x64 $(IM_FILTER) $@.png $@
 	$(Q) rm -f $@.png
 
