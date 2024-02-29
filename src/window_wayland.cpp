@@ -3,7 +3,7 @@
 #ifdef USE_WINDOW_WAYLAND
 
 #include "config.hpp"
-#include "error.hpp"
+#include "egl_error.hpp"
 #include "event.hpp"
 #include "toolbox_ringbuffer.hpp"
 #include "windowevent_ringbuffer.hpp"
@@ -99,18 +99,6 @@ struct WindowWayland::Impl
 
 namespace
 {
-
-class EGLError : public Error
-{
-public:
-    explicit EGLError(const char *description,
-                      const char *func = __builtin_FUNCTION(),
-                      const char *file = __builtin_FILE(),
-                      int line = __builtin_LINE())
-        : Error{description + std::string{". EGL Error: "} + std::to_string(eglGetError()), func, file, line}
-    {
-    }
-};
 
 // wl_pointer_listener
 

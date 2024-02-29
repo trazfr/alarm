@@ -4,7 +4,7 @@
 
 #include "windowevent_linux.hpp"
 
-#include "error.hpp"
+#include "egl_error.hpp"
 
 // variadic macros issue... we don't need vcos_logging.h
 #define VCOS_LOGGING_H
@@ -27,18 +27,6 @@ struct Dispmanx
     DISPMANX_DISPLAY_HANDLE_T dispmanDisplay = 0;
 
     EGL_DISPMANX_WINDOW_T eglNativeWindow = {};
-};
-
-class EGLError : public Error
-{
-public:
-    explicit EGLError(const char *description,
-                      const char *func = __builtin_FUNCTION(),
-                      const char *file = __builtin_FILE(),
-                      int line = __builtin_LINE())
-        : Error{description + std::string{". EGL Error: "} + std::to_string(eglGetError()), func, file, line}
-    {
-    }
 };
 
 Dispmanx createDispanxWindow(int width, int height)

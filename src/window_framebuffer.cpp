@@ -11,7 +11,7 @@
 
 #include "windowevent_linux.hpp"
 
-#include "error.hpp"
+#include "egl_error.hpp"
 #include "toolbox_gl.hpp"
 #include "toolbox_io.hpp"
 #include "toolbox_time.hpp"
@@ -85,57 +85,6 @@ size_t glPixelSize(GLenum format)
         throw std::runtime_error{"Unsupported format: " + std::to_string(format)};
     }
 }
-
-class EGLError : public Error
-{
-public:
-    explicit EGLError(const char *description,
-                      const char *func = __builtin_FUNCTION(),
-                      const char *file = __builtin_FILE(),
-                      int line = __builtin_LINE())
-        : EGLError{description, eglGetError(), func, file, line}
-    {
-    }
-
-private:
-    explicit EGLError(const char *description,
-                      EGLint eglError,
-                      const char *func,
-                      const char *file,
-                      int line)
-        : Error{std::string(description) + ". EGL Error: " + std::to_string(eglError) + ": " + eglErrorDescription(eglError), func, file, line}
-    {
-    }
-
-    // https://registry.khronos.org/EGL/sdk/docs/man/html/eglGetError.xhtml
-    static const char *eglErrorDescription(EGLint eglError)
-    {
-#define EGL_CASE(e) \
-    case e:         \
-        return #e
-
-        switch (eglError)
-        {
-            EGL_CASE(EGL_SUCCESS);
-            EGL_CASE(EGL_NOT_INITIALIZED);
-            EGL_CASE(EGL_BAD_ACCESS);
-            EGL_CASE(EGL_BAD_ALLOC);
-            EGL_CASE(EGL_BAD_ATTRIBUTE);
-            EGL_CASE(EGL_BAD_CONTEXT);
-            EGL_CASE(EGL_BAD_CONFIG);
-            EGL_CASE(EGL_BAD_CURRENT_SURFACE);
-            EGL_CASE(EGL_BAD_DISPLAY);
-            EGL_CASE(EGL_BAD_SURFACE);
-            EGL_CASE(EGL_BAD_MATCH);
-            EGL_CASE(EGL_BAD_PARAMETER);
-            EGL_CASE(EGL_BAD_NATIVE_PIXMAP);
-            EGL_CASE(EGL_BAD_NATIVE_WINDOW);
-            EGL_CASE(EGL_CONTEXT_LOST);
-        default:
-            return "UNKNOWN";
-        }
-    }
-};
 
 } // namespace
 
