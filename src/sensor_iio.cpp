@@ -13,6 +13,8 @@ namespace
 
 using Buffer_t = std::array<char, 65>;
 
+static constexpr long INVALID_LONG = std::numeric_limits<long>::min();
+
 long readLong(const char *filename)
 {
     Buffer_t value;
@@ -25,7 +27,7 @@ long readLong(const char *filename)
             return longValue;
         }
     }
-    return std::numeric_limits<long>::min();
+    return INVALID_LONG;
 }
 
 } // namespace
@@ -49,7 +51,7 @@ SensorIio::SensorIio(std::string_view path, std::string_view type)
     filenameBase += type;
 
     const fs::path filenameScale = fsPath / (filenameBase + "_scale");
-    if (const long scale = readLong(filenameScale.c_str()); scale > std::numeric_limits<long>::min())
+    if (const long scale = readLong(filenameScale.c_str()); scale != INVALID_LONG)
     {
         pimpl->scale = 1000. / scale;
     }
@@ -57,7 +59,7 @@ SensorIio::SensorIio(std::string_view path, std::string_view type)
     const fs::path filenameValue = fsPath / (filenameBase + "_raw");
     copyBuffer(pimpl->sensorPath, filenameValue.native());
 
-    if (const long value = readLong(pimpl->sensorPath.data()); value > std::numeric_limits<long>::min())
+    if (const long value = readLong(pimpl->sensorPath.data()); value != INVALID_LONG)
     {
         pimpl->value = value / pimpl->scale;
         const fs::path pathSensorName = fsPath / "name";
@@ -99,7 +101,7 @@ bool SensorIio::refresh(const Clock::time_point &time)
 {
     if (time >= pimpl->nextRefresh)
     {
-        if (const long value = readLong(pimpl->sensorPath.data()); value > std::numeric_limits<long>::min())
+        if (const long value = readLong(pimpl->sensorPath.data()); value != INVALID_LONG)
         {
             pimpl->value = value / pimpl->scale;
             pimpl->nextRefresh = time + std::chrono::milliseconds{(pimpl->rand() % 120000) + 60000};
