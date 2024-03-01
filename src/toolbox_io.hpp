@@ -20,6 +20,7 @@ struct CloseFile
         std::fclose(file);
     }
 };
+
 /**
  * std::unique_ptr<> to close a C-like FILE at destruction time
  *
@@ -32,13 +33,14 @@ using FILEUnique = std::unique_ptr<FILE, CloseFile>;
  */
 struct FileUnix
 {
-    explicit FileUnix(int fd = -1) : fd{fd} {}
+    static constexpr int INVALID = -1;
+    explicit FileUnix(int fd = INVALID) : fd{fd} {}
 
     explicit FileUnix(FileUnix &&other);
     FileUnix &operator=(FileUnix &&other);
 
     ~FileUnix();
-    int fd;
+    int fd = INVALID;
 };
 
 /**

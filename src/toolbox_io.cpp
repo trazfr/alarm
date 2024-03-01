@@ -1,5 +1,8 @@
 #include "toolbox_io.hpp"
 
+#include "error.hpp"
+
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -9,6 +12,18 @@
 
 namespace
 {
+
+class ErrorErrno : public Error
+{
+public:
+    explicit ErrorErrno(std::string description,
+                        const char *func = __builtin_FUNCTION(),
+                        const char *file = __builtin_FILE(),
+                        int line = __builtin_LINE())
+        : Error{description + ". Errno: " + std::to_string(errno), func, file, line}
+    {
+    }
+};
 
 std::string getErrorMessage(std::string message, const char *filenameDebug)
 {
@@ -34,10 +49,9 @@ std::pair<FileUnix, size_t> openFileWithSize(int fd)
         }
     }
 
-    return std::pair<FileUnix, size_t>{
+    return std::make_pair(
         std::move(fdResult),
-        resultSize,
-    };
+        resultSize);
 }
 
 std::pair<FileUnix, size_t> openFileWithSize(const char *filename)
@@ -64,6 +78,7 @@ FileUnix::~FileUnix()
     {
         close(fd);
     }
+    fd = INVALID;
 }
 
 MmapFile::MmapFile(const char *filename)
@@ -88,7 +103,12 @@ MmapFile::MmapFile(int fd, const char *filenameDebug)
     {
         throw std::runtime_error{getErrorMessage("Could not read file", filenameDebug)};
     }
-    *this = MmapFile{mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fdUnix.fd, 0), size};
+    void *const content = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fdUnix.fd, 0);
+    if (content == MAP_FAILED)
+    {
+        throw ErrorErrno{getErrorMessage("Could not mmap the file", filenameDebug)};
+    }
+    *this = MmapFile{content, size};
 }
 
 MmapFile::MmapFile(void *content, size_t size)
@@ -120,6 +140,8 @@ MmapFile::~MmapFile()
     {
         munmap(content, size);
     }
+    content = nullptr;
+    size = 0;
 }
 
 size_t copyBuffer(void *dest, size_t destSize, const void *src, size_t srcSize)
@@ -135,7 +157,7 @@ size_t readFile(const char *filename, char *buffer, size_t bufferSize)
     const FileUnix fd{open(filename, O_RDONLY, 0)};
     if (fd.fd < 0)
     {
-        throw std::runtime_error{getErrorMessage("Could not open file", filename)};
+        throw ErrorErrno{getErrorMessage("Could not open file", filename)};
     }
 
     const auto size = read(fd.fd, buffer, bufferSize - 1);
@@ -152,7 +174,7 @@ std::string readFile(const char *filename)
     const auto [fd, size] = openFileWithSize(filename);
     if (fd.fd < 0)
     {
-        throw std::runtime_error{getErrorMessage("Could not open file", filename)};
+        throw ErrorErrno{getErrorMessage("Could not open file", filename)};
     }
 
     std::string result(size, '\0');
