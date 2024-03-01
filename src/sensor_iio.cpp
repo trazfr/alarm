@@ -79,7 +79,8 @@ std::vector<std::unique_ptr<Sensor>> SensorIio::create(std::string_view type)
     {
         for (auto &dirEntry : fs::directory_iterator{devices})
         {
-            if (fs::is_directory(dirEntry) && std::strstr(dirEntry.path().c_str(), "device") != nullptr)
+            const auto filename = dirEntry.path().filename();
+            if (fs::is_directory(dirEntry) && std::strncmp("iio::device", filename.c_str(), sizeof("iio::device") - 1) == 0)
             {
                 auto sensor = std::make_unique<SensorIio>(dirEntry.path().c_str(), type);
                 if (const auto name = sensor->getName();
