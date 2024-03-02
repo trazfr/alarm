@@ -64,8 +64,6 @@ GLenum glFormat(uint32_t frameBufferPixelSize)
     {
     case 2:
         return GL_RGB;
-    case 3:
-        return GL_RGB;
     case 4:
         return GL_RGBA;
     default:
@@ -73,7 +71,7 @@ GLenum glFormat(uint32_t frameBufferPixelSize)
     }
 }
 
-size_t glPixelSize(GLenum format)
+uint32_t glPixelSize(GLenum format)
 {
     switch (format)
     {
@@ -113,13 +111,14 @@ struct WindowFramebuffer::Impl
     uint32_t height = 0;
     uint32_t width = 0;
     uint32_t frameBufferPixelSize = 0;
+    uint32_t frameBufferStride = 0;
     FramebufferFilename_t framebuffer;
     MmapFile mmaped;
 
     std::vector<char> glFrame;
 
     GLenum glFormat = 0;
-    GLenum glPixelSize = 0;
+    uint32_t glPixelSize = 0;
     EGLDisplay eglDisplay = nullptr;
     EGLSurface eglSurface = nullptr;
     EGLContext eglContext = nullptr;
@@ -153,12 +152,11 @@ WindowFramebuffer::WindowFramebuffer(int width, int height)
         throw std::runtime_error{std::string{pimpl->framebuffer.data()} + " is " + std::to_string(vinfo.bits_per_pixel) + "bpp"};
     }
     pimpl->frameBufferPixelSize = vinfo.bits_per_pixel >> 3;
+    pimpl->frameBufferStride = finfo.line_length;
 
-    if (vinfo.xres != pimpl->width || vinfo.yres != pimpl->height)
+    if (vinfo.xres < pimpl->width || vinfo.yres < pimpl->height)
     {
-        std::cerr << "Overriding width*height from " << pimpl->width << '*' << pimpl->height << " to " << vinfo.xres << '*' << vinfo.yres << std::endl;
-        pimpl->width = vinfo.xres;
-        pimpl->height = vinfo.yres;
+        throw std::runtime_error{std::string{pimpl->framebuffer.data()} + "=" + std::to_string(vinfo.xres) + "*" + std::to_string(vinfo.yres) + " is smaller than " + std::to_string(pimpl->width) + "*" + std::to_string(pimpl->height)};
     }
 
     pimpl->mmaped = MmapFile{mmap(nullptr, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd.fd, 0),
@@ -235,36 +233,50 @@ void WindowFramebuffer::end()
     // ~2.5ms in RGB
     glReadPixels(0, 0, pimpl->width, pimpl->height, pimpl->glFormat, GL_UNSIGNED_BYTE, pimpl->glFrame.data());
 
-    if (pimpl->frameBufferPixelSize == pimpl->glPixelSize)
+    const auto glBegin = reinterpret_cast<const uint8_t *>(pimpl->glFrame.data());
+    const auto glLineLen = pimpl->width * pimpl->glPixelSize;
+    const auto frameBufferStride = pimpl->frameBufferStride;
+
+    auto glLineEnd = reinterpret_cast<uint8_t *>(pimpl->glFrame.data() + glLineLen * pimpl->height);
+    auto fbLineBegin = reinterpret_cast<uint8_t *>(pimpl->mmaped.content);
+
+    if (pimpl->glPixelSize == 4 && pimpl->frameBufferPixelSize == pimpl->glPixelSize)
     {
-        std::memcpy(pimpl->mmaped.content, pimpl->glFrame.data(), pimpl->glFrame.size());
+        while (glLineEnd > glBegin)
+        {
+            const auto glLineBegin = glLineEnd - glLineLen;
+
+            std::memcpy(fbLineBegin, glLineBegin, glLineLen);
+
+            glLineEnd = glLineBegin;
+            fbLineBegin += frameBufferStride;
+        }
     }
     else if (pimpl->frameBufferPixelSize == 2 && pimpl->glPixelSize == 3)
     {
-        constexpr size_t glPixelSize = 3;
-        const auto inputLineLen = pimpl->width * glPixelSize;
-        const auto begin = reinterpret_cast<const uint8_t *>(pimpl->glFrame.data());
-        auto inputLineEnd = reinterpret_cast<uint8_t *>(pimpl->glFrame.data() + inputLineLen * pimpl->height);
-        auto output = reinterpret_cast<uint32_t *>(pimpl->mmaped.content);
+        constexpr uint32_t glPixelSize = 3;
 
         // convert RBG888 -> RGB565 + flip vertical
         // ~5.5ms in RGB
-        while (inputLineEnd > begin)
+        while (glLineEnd > glBegin)
         {
-            const auto dataBegin = reinterpret_cast<uint8_t *>(inputLineEnd - inputLineLen);
-            auto inputPixel = dataBegin;
+            const auto glLineBegin = glLineEnd - glLineLen;
 
-            while (inputPixel < inputLineEnd)
+            auto fbPixel = reinterpret_cast<uint32_t *>(fbLineBegin);
+            auto glPixel = glLineBegin;
+            while (glPixel < glLineEnd)
             {
-                const uint32_t r = inputPixel[0] << 16 | inputPixel[glPixelSize];
-                const uint32_t g = inputPixel[1] << 16 | inputPixel[glPixelSize + 1];
-                const uint32_t b = inputPixel[2] << 16 | inputPixel[glPixelSize + 2];
-                *output = htobe32((r & 0x00f800f8) << 8 | ((g & 0x00fc00fc) << 3) | ((b & 0x00f800f8) >> 3));
+                const uint32_t r = glPixel[0] << 16 | glPixel[glPixelSize];
+                const uint32_t g = glPixel[1] << 16 | glPixel[glPixelSize + 1];
+                const uint32_t b = glPixel[2] << 16 | glPixel[glPixelSize + 2];
+                *fbPixel = htobe32((r & 0x00f800f8) << 8 | ((g & 0x00fc00fc) << 3) | ((b & 0x00f800f8) >> 3));
 
-                inputPixel += glPixelSize * 2;
-                ++output;
+                glPixel += glPixelSize * 2;
+                ++fbPixel;
             }
-            inputLineEnd = dataBegin;
+
+            glLineEnd = glLineBegin;
+            fbLineBegin += frameBufferStride;
         }
     }
 }
