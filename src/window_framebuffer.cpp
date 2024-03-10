@@ -147,7 +147,7 @@ WindowFramebuffer::WindowFramebuffer(int width, int height)
     {
         throw std::runtime_error{"ioctl(FBIOGET_VSCREENINFO) failed"};
     }
-    if (vinfo.bits_per_pixel != 16 && vinfo.bits_per_pixel != 24 && vinfo.bits_per_pixel != 32)
+    if (vinfo.bits_per_pixel != 16 && vinfo.bits_per_pixel != 32)
     {
         throw std::runtime_error{std::string{pimpl->framebuffer.data()} + " is " + std::to_string(vinfo.bits_per_pixel) + "bpp"};
     }
@@ -242,11 +242,23 @@ void WindowFramebuffer::end()
 
     if (pimpl->glPixelSize == 4 && pimpl->frameBufferPixelSize == pimpl->glPixelSize)
     {
+        constexpr uint32_t glPixelSize = 4;
         while (glLineEnd > glBegin)
         {
             const auto glLineBegin = glLineEnd - glLineLen;
 
-            std::memcpy(fbLineBegin, glLineBegin, glLineLen);
+            auto fbPixel = reinterpret_cast<uint32_t *>(fbLineBegin);
+            auto glPixel = glLineBegin;
+            while (glPixel < glLineEnd)
+            {
+                const uint32_t r = glPixel[0] << 8;
+                const uint32_t g = glPixel[1] << 16;
+                const uint32_t b = glPixel[2] << 24;
+                *fbPixel = htobe32(r | g | b);
+
+                glPixel += glPixelSize;
+                ++fbPixel;
+            }
 
             glLineEnd = glLineBegin;
             fbLineBegin += frameBufferStride;
