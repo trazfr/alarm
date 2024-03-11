@@ -35,52 +35,27 @@ namespace
 
 using FramebufferFilename_t = std::array<char, sizeof("/dev/fb99")>;
 
+constexpr GLenum glType = GL_UNSIGNED_BYTE;
+constexpr GLenum glFormat = GL_RGBA;
+constexpr uint32_t glPixelSize = 4;
+
 // not very accurate... but should be OK for Raspberry (either /dev/fb1 if HDMI is plugged in or /dev/fb0)
 FramebufferFilename_t getLastFb()
 {
-    FramebufferFilename_t result;
     for (int fbNumber = 0;; ++fbNumber)
     {
-        FramebufferFilename_t buffer;
-        const int bytesWritten = std::snprintf(buffer.data(), buffer.size(), "/dev/fb%d", fbNumber);
-        if (bytesWritten >= static_cast<int>(buffer.size()))
+        FramebufferFilename_t result;
+        const int bytesWritten = std::snprintf(result.data(), result.size(), "/dev/fb%d", fbNumber);
+        if (bytesWritten >= static_cast<int>(result.size()))
         {
             throw std::runtime_error{"WindowFramebuffer: too many framebuffers"};
         }
 
-        FileUnix fd{open(buffer.data(), O_WRONLY)};
-        if (fd.fd < 0)
+        const FileUnix fd{open(result.data(), O_WRONLY)};
+        if (fd.fd >= 0)
         {
-            break;
+            return result;
         }
-        result = buffer;
-    }
-    return result;
-}
-
-GLenum glFormat(uint32_t frameBufferPixelSize)
-{
-    switch (frameBufferPixelSize)
-    {
-    case 2:
-        return GL_RGB;
-    case 4:
-        return GL_RGBA;
-    default:
-        return 0;
-    }
-}
-
-uint32_t glPixelSize(GLenum format)
-{
-    switch (format)
-    {
-    case GL_RGB:
-        return 3;
-    case GL_RGBA:
-        return 4;
-    default:
-        throw std::runtime_error{"Unsupported format: " + std::to_string(format)};
     }
 }
 
@@ -117,8 +92,6 @@ struct WindowFramebuffer::Impl
 
     std::vector<char> glFrame;
 
-    GLenum glFormat = 0;
-    uint32_t glPixelSize = 0;
     EGLDisplay eglDisplay = nullptr;
     EGLSurface eglSurface = nullptr;
     EGLContext eglContext = nullptr;
@@ -215,9 +188,7 @@ WindowFramebuffer::WindowFramebuffer(int width, int height)
         throw EGLError{"eglMakeCurrent() failed"};
     }
 
-    pimpl->glFormat = glFormat(pimpl->frameBufferPixelSize);
-    pimpl->glPixelSize = glPixelSize(pimpl->glFormat);
-    pimpl->glFrame.resize(pimpl->width * pimpl->height * pimpl->glPixelSize);
+    pimpl->glFrame.resize(pimpl->width * pimpl->height * glPixelSize);
 }
 
 WindowFramebuffer::~WindowFramebuffer() = default;
@@ -231,32 +202,26 @@ void WindowFramebuffer::end()
     // ~1.3ms in RGB
     glFinish();
     // ~2.5ms in RGB
-    glReadPixels(0, 0, pimpl->width, pimpl->height, pimpl->glFormat, GL_UNSIGNED_BYTE, pimpl->glFrame.data());
-
+    glReadPixels(0, 0, pimpl->width, pimpl->height, glFormat, glType, pimpl->glFrame.data());
     const auto glBegin = reinterpret_cast<const uint8_t *>(pimpl->glFrame.data());
-    const auto glLineLen = pimpl->width * pimpl->glPixelSize;
+    const auto glLineLen = pimpl->width * glPixelSize;
     const auto frameBufferStride = pimpl->frameBufferStride;
 
     auto glLineEnd = reinterpret_cast<uint8_t *>(pimpl->glFrame.data() + glLineLen * pimpl->height);
     auto fbLineBegin = reinterpret_cast<uint8_t *>(pimpl->mmaped.content);
 
-    if (pimpl->glPixelSize == 4 && pimpl->frameBufferPixelSize == pimpl->glPixelSize)
+    if (pimpl->frameBufferPixelSize == 4)
     {
-        constexpr uint32_t glPixelSize = 4;
         while (glLineEnd > glBegin)
         {
             const auto glLineBegin = glLineEnd - glLineLen;
 
             auto fbPixel = reinterpret_cast<uint32_t *>(fbLineBegin);
-            auto glPixel = glLineBegin;
-            while (glPixel < glLineEnd)
+            auto glPixel = reinterpret_cast<uint32_t *>(glLineBegin);
+            while (glPixel < reinterpret_cast<const uint32_t*>(glLineEnd))
             {
-                const uint32_t r = glPixel[0] << 8;
-                const uint32_t g = glPixel[1] << 16;
-                const uint32_t b = glPixel[2] << 24;
-                *fbPixel = htobe32(r | g | b);
-
-                glPixel += glPixelSize;
+                *fbPixel = htobe32((*glPixel) << 8);
+                ++glPixel;
                 ++fbPixel;
             }
 
@@ -264,11 +229,9 @@ void WindowFramebuffer::end()
             fbLineBegin += frameBufferStride;
         }
     }
-    else if (pimpl->frameBufferPixelSize == 2 && pimpl->glPixelSize == 3)
+    else if (pimpl->frameBufferPixelSize == 2)
     {
-        constexpr uint32_t glPixelSize = 3;
-
-        // convert RBG888 -> RGB565 + flip vertical
+        // convert RGBA8888 -> RGB565 + flip vertical
         // ~5.5ms in RGB
         while (glLineEnd > glBegin)
         {
